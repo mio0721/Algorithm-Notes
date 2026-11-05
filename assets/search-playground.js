@@ -49,13 +49,13 @@ function graphTrace(id,data){
  const diagram={nodes:positions.map(([x,y],i)=>[label(i),x,y]),edges,directed,viewBox};
  const frames=[],seen=new Set(),order=[],path=[];const show=a=>a.map(label).join(' → ')||'空';
  const add=(text,highlight=[],cells=[],partial=diagram)=>{if(frames.length<450)frames.push({text,highlight:[...highlight],cells:[...cells],active:[],diagram:partial});};
- add(`${count} 个节点；${directed?'有向':'无向'}图。从 ${label(start)} 出发。`,[],[],['2.4','2.5'].includes(id)?{...diagram,edges:[]}:diagram);
+ add(`${count} 个节点；${directed?'有向':'无向'}图。从 ${label(start)} 出发。`,[],[],id==='2.5'?{...diagram,edges:[]}:diagram);
  if(id==='2.5'){
   const adj=Array.from({length:count},()=>[]);
   edges.forEach(([a,b],index)=>{adj[a].push(b);adj[b].push(a);add(`加入无向边 ${label(a)}—${label(b)}，两端邻接表都更新。`,[a,b],adj.map((v,u)=>`${label(u)}: ${show(v)}`),{...diagram,edges:edges.slice(0,index+1)});});
   return frames;
  }
- if(id==='2.4'){edges.forEach(([a,b],i)=>add(`加入 ${label(a)} → ${label(b)}；反向不自动成立。`,[a,b],[],{...diagram,edges:edges.slice(0,i+1)}));return frames;}
+ if(id==='2.4'){edges.forEach(([a,b])=>{add(`观察 ${label(a)} → ${label(b)}；反向不自动成立。`,[a,b]);frames.at(-1).route=[a,b];});return frames;}
  if(id==='3.3'){
   let paths=0,truncated=false;const results=[];
   const dfs=u=>{if(frames.length>=440){truncated=true;return;}seen.add(u);path.push(u);add(`选择 ${label(u)}`,path,['当前路径：'+show(path)]);

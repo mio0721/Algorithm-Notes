@@ -15,6 +15,7 @@ def graph_for(id):
     return g,edges,directed
 
 def trace(id):
+    if id in ('2.1','2.2'):return recursion_trace(id)
     if id in ('3.7','3.8'):return grid_trace(id)
     if id not in ('3.1','3.2','3.3','3.4','3.5','3.6'):return None
     g,edges,directed=graph_for(id)
@@ -72,6 +73,33 @@ def trace(id):
             path=[];u=9
             while u!=-1:path.append(u);u=parent[u]
             path.reverse();add('A 到 J 的最短路径共 '+str(dist[9])+' 条边。',path,['最短路径：'+show(path)])
+    return frames
+
+def recursion_trace(id):
+    n=3 if id=='2.1' else 2
+    frames=[];stack=[];logs=[]
+    def add(text,equation='',returned=''):
+        frames.append({'cells':[],'active':[],'text':text,'recursion':{
+            'stack':list(stack),'equation':equation,'returned':returned,
+            'logs':list(logs) if id=='2.2' else None}})
+    add(f'main 准备调用 sum({n})。','等待函数调用')
+    for value in range(n,-1,-1):
+        stack.append(value)
+        if id=='2.2':logs.append(f'进入 {value}')
+        add(f'sum({value}) 入栈。'+('命中基例，返回 0。' if value==0 else '当前调用等待下一层返回。'),
+            'sum(0) = 0' if value==0 else f'sum({value}) = {value} + sum({value-1})')
+    stack.pop();result=0
+    add('sum(0) 出栈，把 0 交给 sum(1)。','返回到上一层','sum(0) → 0')
+    for value in range(1,n+1):
+        smaller=result;result=value+smaller
+        if id=='2.2':logs.append(f'返回 {value}')
+        add(f'恢复 sum({value})，读取下一层返回的 {smaller}，计算得到 {result}。',
+            f'sum({value}) = {value} + {smaller} = {result}')
+        stack.pop()
+        add(f'sum({value}) 出栈，'+('main 收到最终结果。' if not stack else '把结果交给上一层。'),
+            f'最终结果：{result}' if not stack else '上一层恢复执行',f'sum({value}) → {result}')
+    if id=='2.2':
+        logs.append(f'结果: {result}');add('main 打印最终结果。注意基例直接 return，不会打印“返回 0”。',f'最终结果：{result}')
     return frames
 
 def grid_trace(id):

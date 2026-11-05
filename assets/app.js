@@ -50,6 +50,17 @@
   };
   function drawGraph(){
     const f=frames[i],d=f.diagram;
+    if(f.recursion){
+      const data=f.recursion,wrap=document.createElement('div');wrap.className='recursion-demo';
+      const stack=document.createElement('section'),heading=document.createElement('strong');heading.textContent='调用栈（栈顶在上方）';stack.appendChild(heading);
+      const cards=document.createElement('div');cards.className='call-stack';
+      [...data.stack].reverse().forEach((n,index)=>{const card=document.createElement('div');card.className='stack-frame'+(index===0?' executing':'');const name=document.createElement('strong'),state=document.createElement('span');name.textContent=`sum(${n})`;state.textContent=index===0?'当前执行':'暂停，等待下一层返回';card.append(name,state);cards.appendChild(card);});
+      const main=document.createElement('div');main.className='stack-frame main-frame';main.textContent=data.stack.length?'main · 等待 sum 返回':'main · 当前执行';cards.appendChild(main);stack.appendChild(cards);
+      const detail=document.createElement('section'),title=document.createElement('strong'),equation=document.createElement('p');title.textContent='当前计算';equation.className='recursion-equation';equation.textContent=data.equation;detail.append(title,equation);
+      if(data.returned){const result=document.createElement('p');result.className='return-value';result.textContent='返回值：'+data.returned;detail.appendChild(result);}
+      if(data.logs!==null){const label=document.createElement('strong'),log=document.createElement('pre');label.textContent='程序输出（按实际执行顺序）';log.className='recursion-log';log.textContent=data.logs.join('\n')||'尚无输出';detail.append(label,log);}
+      wrap.append(stack,detail);graph.replaceChildren(wrap);return;
+    }
     if(f.grid){
       const wrap=document.createElement('div');wrap.className='grid-map';wrap.setAttribute('role','group');wrap.setAttribute('aria-label','网格搜索地图，点击格子可编辑');wrap.style.gridTemplateColumns=`repeat(${f.grid[0].length},1fr)`;
       const contains=(list,r,c)=>(list||[]).some(p=>p[0]===r&&p[1]===c);
@@ -103,6 +114,23 @@
     drawGraph();text.textContent=f.text;status.textContent=`第 ${i+1} / ${frames.length} 步`;prev.disabled=i===0;next.disabled=i===frames.length-1;
   }
   const play=root.querySelector('[data-action=play]');
+  function reserveSpace(){
+    const current=i,selected=resultIndex;
+    const areas=[graph,stage,root.querySelector('.pointer-outside'),text];
+    const heights=areas.map(()=>0);
+    root.setAttribute('aria-busy','true');root.dataset.sizing='true';
+    areas.forEach(el=>{el.style.minHeight='';});
+    try{
+      // Measure at the actual reading width, including wrapped text and stack depth.
+      for(let step=0;step<frames.length;step++){
+        i=step;draw();
+        areas.forEach((el,index)=>{heights[index]=Math.max(heights[index],Math.ceil(el.getBoundingClientRect().height));});
+      }
+      areas.forEach((el,index)=>{el.style.minHeight=heights[index]+'px';});
+    }finally{
+      i=current;resultIndex=selected;delete root.dataset.sizing;root.removeAttribute('aria-busy');draw();
+    }
+  }
   function stop(){if(timer!==null){clearInterval(timer);timer=null}if(play)play.textContent='自动播放';}
   root.addEventListener('graph-edit-start',stop);
   prev.addEventListener('click',()=>{stop();if(i>0){i--;draw()}});
@@ -110,7 +138,7 @@
   root.querySelector('[data-action=reset]').addEventListener('click',()=>{stop();i=0;draw()});
   if(play)play.addEventListener('click',()=>{if(timer!==null){stop();return}if(i===frames.length-1)i=0;draw();play.textContent='暂停播放';timer=setInterval(()=>{if(i>=frames.length-1){stop();return}i++;draw();if(i>=frames.length-1)stop()},900)});
   if(window.SearchPlayground?.supported.includes(id)){
-    window.SearchPlayground.mount(root,id,newFrames=>{stop();frames=newFrames;i=0;draw()});
+    window.SearchPlayground.mount(root,id,newFrames=>{stop();frames=newFrames;i=0;resultIndex=0;reserveSpace()});
   }else if(root.querySelector('[data-input=array]')){
     const api=window.AlgorithmTraces,defaults=api.defaults[id],array=root.querySelector('[data-input=array]'),target=root.querySelector('[data-input=target]'),preset=root.querySelector('[data-input=preset]'),message=root.querySelector('.demo-error');
     const cases={
@@ -124,8 +152,17 @@
       '1.8':{first:{nums:[1,2,3,4,5,6,7,8,9]},last:{nums:[9,8,7,6,5,4,3,2,1]},single:{nums:[4]},empty:{nums:[]},missing:{nums:[3,1,3,2,1,2,3,1,2]}}
     };
     function fill(choice){const data=choice==='default'?defaults:cases[id][choice];array.value=data.nums.join(id==='1.7'?'':', ');if(target)target.value=String(data.value);}
-    function apply(){stop();try{const data=api.parse(id,array.value,target?target.value:'');frames=api.trace(id,data.arr,data.value);i=0;message.textContent='';draw()}catch(err){message.textContent=err.message;}}
+    function apply(){stop();try{const data=api.parse(id,array.value,target?target.value:'');frames=api.trace(id,data.arr,data.value);i=0;message.textContent='';reserveSpace()}catch(err){message.textContent=err.message;}}
     preset.addEventListener('change',()=>{fill(preset.value);apply()});root.querySelector('[data-action=apply]').addEventListener('click',apply);
     fill('default');apply();
-  }else draw();
+  }else reserveSpace();
+  let measuredWidth=root.getBoundingClientRect().width,resizeTimer;
+  if(window.ResizeObserver){
+    const observer=new ResizeObserver(()=>{
+      const width=root.getBoundingClientRect().width;
+      if(Math.abs(width-measuredWidth)<1)return;
+      measuredWidth=width;stop();clearTimeout(resizeTimer);resizeTimer=setTimeout(reserveSpace,120);
+    });
+    observer.observe(root);
+  }
 })();

@@ -1,6 +1,6 @@
 (()=>{
   const toggle=document.querySelector('#theme-toggle');
-  function setTheme(value){document.documentElement.dataset.theme=value;toggle.textContent=value==='dark'?'切换日间':'切换夜间';toggle.setAttribute('aria-pressed',String(value==='dark'))}
+  function setTheme(value){document.documentElement.dataset.theme=value;toggle.querySelector('.theme-icon').textContent=value==='dark'?'☀':'☾';toggle.querySelector('.theme-label').textContent=value==='dark'?'日间模式':'夜间模式';toggle.setAttribute('aria-pressed',String(value==='dark'))}
   try{setTheme(localStorage.getItem('algorithm-notes-theme')||'light')}catch(e){setTheme('light')}
   toggle.addEventListener('click',()=>{const n=document.documentElement.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('algorithm-notes-theme',n)}catch(e){}setTheme(n)});
   document.querySelectorAll('.code-block').forEach(block=>{

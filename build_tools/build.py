@@ -2,9 +2,16 @@ from pathlib import Path
 from html import escape
 import json
 import posixpath
-from content import LESSONS
-from code_examples import code_for
-ROOT=Path(__file__).resolve().parent
+from content import LESSONS as EXISTING_LESSONS
+from new_lessons import LESSONS as NEW_LESSONS
+from code_examples import code_for as original_code_for
+from new_examples import code_for as new_code_for
+from expanded_lessons import extra
+from graph_examples import trace as graph_trace
+LESSONS=sorted(EXISTING_LESSONS+NEW_LESSONS,key=lambda x:tuple(map(int,x[0].split('.'))))
+def code_for(item):
+ return new_code_for(item[0]) if item[0] in {x[0] for x in NEW_LESSONS} else original_code_for(item)
+ROOT=Path(__file__).resolve().parent.parent
 DATA={x[0]:x for x in LESSONS}
 PHASES=[
 ('阶段 0','算法基础与 C++ STL','穿插学习',[('0.1','算法与时间复杂度'),('0.2','vector 与数组'),('0.3','哈希表'),('0.4','栈与队列'),('0.5','堆与优先队列')]),
@@ -47,23 +54,31 @@ def page(title,main,current=None,problem=None,section='lesson'):
  rail=(f'<aside class="problem-rail" aria-label="本节题目">{problem}</aside>' if problem else '')
  layout_class='layout has-problem' if problem else 'layout'
  prefix='../../' if current else ''
- return f'''<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{escape(title)} · 算法笔记</title><script>try{{document.documentElement.dataset.theme=localStorage.getItem('algorithm-notes-theme')||'light'}}catch(e){{}}</script><link rel="icon" type="image/svg+xml" href="{prefix}assets/favicon.svg"><link rel="stylesheet" href="{prefix}assets/style.css"><script defer src="{prefix}assets/traces.js"></script><script defer src="{prefix}assets/app.js"></script></head><body><header class="mast"><div class="mast-inner"><a class="brand" href="{prefix}index.html">算法与数据结构：从基础到机器人路径规划</a><button class="theme theme-toggle" id="theme-toggle" type="button" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">夜间模式</span></button></div></header><div class="{layout_class}">{sidebar(current,section)}<main class="main">{main}</main>{rail}</div></body></html>'''
+ return f'''<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{escape(title)} · 算法笔记</title><script>try{{document.documentElement.dataset.theme=localStorage.getItem('algorithm-notes-theme')||'light'}}catch(e){{}}</script><link rel="icon" type="image/svg+xml" href="{prefix}assets/favicon.svg"><link rel="stylesheet" href="{prefix}assets/style.css"><script defer src="{prefix}assets/traces.js"></script><script defer src="{prefix}assets/extra-traces.js"></script><script defer src="{prefix}assets/search-playground.js"></script><script defer src="{prefix}assets/app.js"></script></head><body><header class="mast"><div class="mast-inner"><a class="brand" href="{prefix}index.html">算法与数据结构：从基础到机器人路径规划</a><button class="theme theme-toggle" id="theme-toggle" type="button" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">夜间模式</span></button></div></header><div class="{layout_class}">{sidebar(current,section)}<main class="main">{main}</main>{rail}</div></body></html>'''
 def lesson_page(item):
  id,title,problem,intuition,rules,complexity,frames,code,exercise,hint=item
+ if id in {x[0] for x in NEW_LESSONS}: code=code_for(item)[0]
  frame_data=[{'cells':cells,'text':text,'active':active} for cells,text,active in frames]
+ frame_data=graph_trace(id) or frame_data
  raw=json.dumps(frame_data,ensure_ascii=False).replace('<','\\u003c')
  nav_ids=list(DATA);i=nav_ids.index(id)
  originals={'1.1':'01_二分查找_LeetCode704.html','1.2':'02_搜索插入位置_LeetCode35.html','1.3':'03_两数之和II_LeetCode167.html','1.4':'04_删除有序数组重复项_LeetCode26.html','1.5':'05_移除元素_LeetCode27.html','1.6':'06_长度最小的子数组_LeetCode209.html'}
- interactive=id in originals
- controls=("<div class=\"demo-controls\"><label>输入数组（整数，逗号或空格分隔）<input type=\"text\" data-input=\"array\" placeholder=\"留空表示空数组\"></label>"+("<label>"+('需要移除的值' if id=='1.5' else '目标值')+"<input type=\"number\" step=\"1\" data-input=\"target\"></label>" if id!='1.4' else '')+"<label>预设例子<select data-input=\"preset\"><option value=\"default\">默认例子</option><option value=\"first\">首端情况</option><option value=\"last\">末端情况</option><option value=\"single\">单元素</option><option value=\"empty\">空数组（扩展）</option><option value=\"missing\">无解或重复情况</option></select></label><button type=\"button\" data-action=\"apply\">应用输入并演示</button><p class=\"demo-error\" role=\"alert\"></p></div>") if interactive else ''
+ interactive=id in originals or id in ('1.7','1.8')
+ controls=("<div class=\"demo-controls\"><label>输入数组（整数，逗号或空格分隔）<input type=\"text\" data-input=\"array\" placeholder=\"留空表示空数组\"></label>"+("<label>"+('需要移除的值' if id=='1.5' else '目标值')+"<input type=\"number\" step=\"1\" data-input=\"target\"></label>" if id not in ('1.4','1.7','1.8') else '')+"<label>预设例子<select data-input=\"preset\"><option value=\"default\">默认例子</option><option value=\"first\">首端情况</option><option value=\"last\">末端情况</option><option value=\"single\">单元素</option><option value=\"empty\">空数组（扩展）</option><option value=\"missing\">无解或重复情况</option></select></label><button type=\"button\" data-action=\"apply\">应用输入并演示</button><p class=\"demo-error\" role=\"alert\"></p></div>") if interactive else ''
+ if id in ('1.7','1.8'):
+  labels=('无重复字符','全部相同','单字符','空字符串','重复回退 abba') if id=='1.7' else ('已有序','完全逆序','单元素','空数组','包含重复值')
+  for old,new in zip(('首端情况','末端情况','单元素','空数组（扩展）','无解或重复情况'),labels):controls=controls.replace('>'+old+'<','>'+new+'<')
+  if id=='1.7':controls=controls.replace('输入数组（整数，逗号或空格分隔）','输入字符串（英文、数字或标点）').replace('留空表示空数组','留空表示空字符串')
  explanation='可修改数组与目标；逐步观察指针、当前比较位置和有效区间。浅色方格表示当前区间或已保留前缀，淡化的方格表示区间之外。' if interactive else '这是一个固定例子。先猜测下一步，再点击按钮；高亮表示当前关注的元素或状态。'
+ if id in ('2.3','2.4','2.5','2.6','3.1','3.2','3.3','3.4','3.5','3.6','3.7','3.8'):
+  explanation='可选择不同预设或编辑图与地图，应用后重新计算搜索过程。修改地图会回到第一步；使用下方按钮逐步观察或自动播放。完整代码提供固定示例，可对照修改数据。'
  play='<button type="button" data-action="play">自动播放</button>'
  legacy=''
  copy='<button type="button" class="copy-code" data-copy aria-label="复制代码" title="复制代码"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"></path></svg></button><span class="copy-status" role="status" aria-live="polite"></span>'
 
  prev=f'<a href="{lesson_link(nav_ids[i-1],id)}">← 上一节</a>' if i else '<a href="../../index.html">← 课程目录</a>'
  nxt=f'<a href="{lesson_link(nav_ids[i+1],id)}">下一节 →</a>' if i+1<len(nav_ids) else '<a href="../../index.html">回到课程目录 →</a>'
- return f'''<div class="eyebrow">阶段 {id.split('.')[0]} · 第 {id} 节</div><h1>{escape(title)}</h1><span class="tag">{escape(problem)}</span><div class="lead"><strong>这一节要解决什么？</strong><p>{escape(intuition)}</p></div><h2>一、先理解做法</h2><p>{escape(rules)}</p><h2>二、逐步观察</h2><p>{explanation}</p><div class="demo" data-lesson="{id}" aria-label="逐步演示">{controls}<div class="graph-view"></div><div class="stage" aria-live="polite"></div><div class="pointer-outside" aria-live="polite"></div><p class="step-text" aria-live="polite"></p><div class="buttons"><button type="button" data-action="prev">上一步</button><button type="button" data-action="next">下一步</button><button type="button" data-action="reset">重新开始</button>{play}</div><div class="status"></div></div><script id="lesson-frames" type="application/json">{raw}</script><h2>三、C++ 实现</h2><p>先读参数与返回值，再逐行对照上面的状态变化。标准容器写法假定已引入相应头文件并使用 <code>std</code> 命名空间；结构定义和片段按上下文放入程序。</p><div class="code-block">{copy}<pre><code class="language-cpp">{escape(code)}</code></pre></div><h2>四、复杂度与适用条件</h2><p>{escape(complexity)}</p><h2>五、独立练习</h2><p>{escape(exercise)}</p><details class="answer"><summary>查看提示与易错点</summary><p>{escape(hint)}</p></details><h2>六、完成前自查</h2><ol><li>能不看代码描述变量的含义和每一步变化吗？</li><li>能解释循环或递归何时结束，以及空输入、边界情况如何处理吗？</li><li>能独立复写，并解释时间与额外空间复杂度吗？</li></ol>{legacy}<div class="next">{prev}{nxt}</div>'''
+ return f'''<div class="eyebrow">阶段 {id.split('.')[0]} · 第 {id} 节</div><h1>{escape(title)}</h1><span class="tag">{escape(problem)}</span><div class="lead"><strong>这一节要解决什么？</strong><p>{escape(intuition)}</p></div><h2>一、先理解做法</h2><p>{escape(rules)}</p>{extra(id)}<h2>二、逐步观察</h2><p>{explanation}</p><div class="demo" data-lesson="{id}" aria-label="逐步演示">{controls}<div class="graph-view"></div><div class="stage" aria-live="polite"></div><div class="pointer-outside" aria-live="polite"></div><p class="step-text" aria-live="polite"></p><div class="buttons"><button type="button" data-action="prev">上一步</button><button type="button" data-action="next">下一步</button><button type="button" data-action="reset">重新开始</button>{play}</div><div class="status"></div></div><script id="lesson-frames" type="application/json">{raw}</script><h2>三、C++ 实现</h2><p>先读参数与返回值，再逐行对照上面的状态变化。标准容器写法假定已引入相应头文件并使用 <code>std</code> 命名空间；结构定义和片段按上下文放入程序。</p><div class="code-block">{copy}<pre><code class="language-cpp">{escape(code)}</code></pre></div><h2>四、复杂度与适用条件</h2><p>{escape(complexity)}</p><h2>五、独立练习</h2><p>{escape(exercise)}</p><details class="answer"><summary>查看提示与易错点</summary><p>{escape(hint)}</p></details><h2>六、完成前自查</h2><ol><li>能不看代码描述变量的含义和每一步变化吗？</li><li>能解释循环或递归何时结束，以及空输入、边界情况如何处理吗？</li><li>能独立复写，并解释时间与额外空间复杂度吗？</li></ol>{legacy}<div class="next">{prev}{nxt}</div>'''
 PROBLEMS={
 '1.1':('704. 二分查找','给定升序且元素互不相同的整数数组 nums 和整数 target，找到目标并返回其下标；找不到则返回 -1。要求时间复杂度 O(log n)。',[('nums = [-1,0,3,5,9,12], target = 9','4'),('nums = [-1,0,3,5,9,12], target = 2','-1')],'原题数组非空、元素互不相同。空数组预设用于扩展边界练习。','https://leetcode.cn/problems/binary-search/'),
 '1.2':('35. 搜索插入位置','给定由互不相同的整数组成的升序数组和目标值，找到目标时返回其下标；不存在时返回应插入的位置，以保持有序。要求时间复杂度 O(log n)。',[('nums = [1,3,5,6], target = 5','2'),('nums = [1,3,5,6], target = 2','1')],'原题数组非空、元素互不相同。空数组与重复元素可作为扩展思考；本实现返回第一个不小于目标的位置。','https://leetcode.cn/problems/search-insert-position/'),

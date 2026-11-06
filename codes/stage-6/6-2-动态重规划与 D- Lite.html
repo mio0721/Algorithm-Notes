@@ -1,0 +1,340 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>动态重规划与 D* Lite · 完整代码 · 算法笔记</title><script>try{document.documentElement.dataset.theme=localStorage.getItem('algorithm-notes-theme')||'light'}catch(e){}</script><link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg"><link rel="stylesheet" href="../../assets/style.css"><script>window.MathJax={tex:{inlineMath:[['$','$']],displayMath:[['$$','$$']],processEscapes:true,packages:{'[+]':['base','ams']}},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer src="../../assets/mathjax-tex-svg.js"></script><script defer src="../../assets/traces.js"></script><script defer src="../../assets/extra-traces.js"></script><script defer src="../../assets/search-playground.js"></script><script defer src="../../assets/advanced-playground.js"></script><script defer src="../../assets/app.js"></script></head><body><header class="mast"><div class="mast-inner"><a class="brand" href="../../index.html">算法与数据结构：从基础到机器人路径规划</a><button class="theme theme-toggle" id="theme-toggle" type="button" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">夜间模式</span></button></div></header><div class="layout"><nav class="sidebar" aria-label="课程目录"><div class="sidebar-title">课程总目录</div><a class="nav-home" href="../../index.html">首页 · 课程目录</a><div class="group-label">按学习阶段查看</div><details class="nav-phase"><summary><span class="phase-title">阶段 0 · 算法基础与 C++ STL</span><small>穿插学习</small></summary><details class="nav-course"><summary><span class="course-number">0.1</span><span class="course-title">算法与时间复杂度</span></summary><div class="nav-course-links"><a href="../../lessons/stage-0/0-1-算法与时间复杂度.html">课程内容</a><a href="../stage-0/0-1-算法与时间复杂度.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">0.2</span><span class="course-title">vector 与数组</span></summary><div class="nav-course-links"><a href="../../lessons/stage-0/0-2-vector 与数组.html">课程内容</a><a href="../stage-0/0-2-vector 与数组.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">0.3</span><span class="course-title">哈希表</span></summary><div class="nav-course-links"><a href="../../lessons/stage-0/0-3-哈希表.html">课程内容</a><a href="../stage-0/0-3-哈希表.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">0.4</span><span class="course-title">栈与队列</span></summary><div class="nav-course-links"><a href="../../lessons/stage-0/0-4-栈与队列.html">课程内容</a><a href="../stage-0/0-4-栈与队列.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">0.5</span><span class="course-title">堆与优先队列</span></summary><div class="nav-course-links"><a href="../../lessons/stage-0/0-5-堆与优先队列.html">课程内容</a><a href="../stage-0/0-5-堆与优先队列.html">完整代码</a></div></details></details><details class="nav-phase"><summary><span class="phase-title">阶段 1 · 数组、查找与双指针</span><small>数组、查找与指针技巧</small></summary><details class="nav-course"><summary><span class="course-number">1.1</span><span class="course-title">二分查找</span></summary><div class="nav-course-links"><a href="../../lessons/stage-1/1-1-二分查找.html">课程内容</a><a href="../stage-1/1-1-二分查找.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">1.2</span><span class="course-title">二分边界与插入位置</span></summary><div class="nav-course-links"><a href="../../lessons/stage-1/1-2-二分边界与插入位置.html">课程内容</a><a href="../stage-1/1-2-二分边界与插入位置.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">1.3</span><span class="course-title">相向双指针</span></summary><div class="nav-course-links"><a href="../../lessons/stage-1/1-3-相向双指针.html">课程内容</a><a href="../stage-1/1-3-相向双指针.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">1.4</span><span class="course-title">快慢指针：数组去重</span></summary><div class="nav-course-links"><a href="../../lessons/stage-1/1-4-快慢指针：数组去重.html">课程内容</a><a href="../stage-1/1-4-快慢指针：数组去重.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">1.5</span><span class="course-title">快慢指针：原地移除</span></summary><div class="nav-course-links"><a href="../../lessons/stage-1/1-5-快慢指针：原地移除.html">课程内容</a><a href="../stage-1/1-5-快慢指针：原地移除.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">1.6</span><span class="course-title">滑动窗口：长度最小的子数组</span></summary><div class="nav-course-links"><a href="../../lessons/stage-1/1-6-滑动窗口：长度最小的子数组.html">课程内容</a><a href="../stage-1/1-6-滑动窗口：长度最小的子数组.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">1.7</span><span class="course-title">滑动窗口与哈希表</span></summary><div class="nav-course-links"><a href="../../lessons/stage-1/1-7-滑动窗口与哈希表.html">课程内容</a><a href="../stage-1/1-7-滑动窗口与哈希表.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">1.8</span><span class="course-title">排序算法</span></summary><div class="nav-course-links"><a href="../../lessons/stage-1/1-8-排序算法.html">课程内容</a><a href="../stage-1/1-8-排序算法.html">完整代码</a></div></details></details><details class="nav-phase"><summary><span class="phase-title">阶段 2 · 递归、树与图的基础</span><small>递归、树和图的基本概念</small></summary><details class="nav-course"><summary><span class="course-number">2.1</span><span class="course-title">递归基础</span></summary><div class="nav-course-links"><a href="../../lessons/stage-2/2-1-递归基础.html">课程内容</a><a href="../stage-2/2-1-递归基础.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">2.2</span><span class="course-title">函数调用栈与递归返回</span></summary><div class="nav-course-links"><a href="../../lessons/stage-2/2-2-函数调用栈与递归返回.html">课程内容</a><a href="../stage-2/2-2-函数调用栈与递归返回.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">2.3</span><span class="course-title">树的基本结构</span></summary><div class="nav-course-links"><a href="../../lessons/stage-2/2-3-树的基本结构.html">课程内容</a><a href="../stage-2/2-3-树的基本结构.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">2.4</span><span class="course-title">图的基本结构</span></summary><div class="nav-course-links"><a href="../../lessons/stage-2/2-4-图的基本结构.html">课程内容</a><a href="../stage-2/2-4-图的基本结构.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">2.5</span><span class="course-title">图的存储：邻接表与邻接矩阵</span></summary><div class="nav-course-links"><a href="../../lessons/stage-2/2-5-图的存储：邻接表与邻接矩阵.html">课程内容</a><a href="../stage-2/2-5-图的存储：邻接表与邻接矩阵.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">2.6</span><span class="course-title">visited 访问标记</span></summary><div class="nav-course-links"><a href="../../lessons/stage-2/2-6-visited 访问标记.html">课程内容</a><a href="../stage-2/2-6-visited 访问标记.html">完整代码</a></div></details></details><details class="nav-phase"><summary><span class="phase-title">阶段 3 · DFS 与 BFS 搜索算法</span><small>学习搜索算法与图遍历</small></summary><details class="nav-course"><summary><span class="course-number">3.1</span><span class="course-title">递归 DFS</span></summary><div class="nav-course-links"><a href="../../lessons/stage-3/3-1-递归 DFS.html">课程内容</a><a href="../stage-3/3-1-递归 DFS.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">3.2</span><span class="course-title">非递归 DFS</span></summary><div class="nav-course-links"><a href="../../lessons/stage-3/3-2-非递归 DFS.html">课程内容</a><a href="../stage-3/3-2-非递归 DFS.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">3.3</span><span class="course-title">DFS 与回溯</span></summary><div class="nav-course-links"><a href="../../lessons/stage-3/3-3-DFS 与回溯.html">课程内容</a><a href="../stage-3/3-3-DFS 与回溯.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">3.4</span><span class="course-title">队列 BFS</span></summary><div class="nav-course-links"><a href="../../lessons/stage-3/3-4-队列 BFS.html">课程内容</a><a href="../stage-3/3-4-队列 BFS.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">3.5</span><span class="course-title">树的层序遍历</span></summary><div class="nav-course-links"><a href="../../lessons/stage-3/3-5-树的层序遍历.html">课程内容</a><a href="../stage-3/3-5-树的层序遍历.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">3.6</span><span class="course-title">无权图最短路径</span></summary><div class="nav-course-links"><a href="../../lessons/stage-3/3-6-无权图最短路径.html">课程内容</a><a href="../stage-3/3-6-无权图最短路径.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">3.7</span><span class="course-title">二维地图 DFS</span></summary><div class="nav-course-links"><a href="../../lessons/stage-3/3-7-二维地图 DFS.html">课程内容</a><a href="../stage-3/3-7-二维地图 DFS.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">3.8</span><span class="course-title">二维地图 BFS 与对比</span></summary><div class="nav-course-links"><a href="../../lessons/stage-3/3-8-二维地图 BFS 与对比.html">课程内容</a><a href="../stage-3/3-8-二维地图 BFS 与对比.html">完整代码</a></div></details></details><details class="nav-phase"><summary><span class="phase-title">阶段 4 · 经典算法设计思想</span><small>回溯、贪心、分治与动态规划</small></summary><details class="nav-course"><summary><span class="course-number">4.1</span><span class="course-title">回溯算法</span></summary><div class="nav-course-links"><a href="../../lessons/stage-4/4-1-回溯算法.html">课程内容</a><a href="../stage-4/4-1-回溯算法.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">4.2</span><span class="course-title">贪心算法</span></summary><div class="nav-course-links"><a href="../../lessons/stage-4/4-2-贪心算法.html">课程内容</a><a href="../stage-4/4-2-贪心算法.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">4.3</span><span class="course-title">分治算法</span></summary><div class="nav-course-links"><a href="../../lessons/stage-4/4-3-分治算法.html">课程内容</a><a href="../stage-4/4-3-分治算法.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">4.4</span><span class="course-title">动态规划基础</span></summary><div class="nav-course-links"><a href="../../lessons/stage-4/4-4-动态规划基础.html">课程内容</a><a href="../stage-4/4-4-动态规划基础.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">4.5</span><span class="course-title">背包动态规划</span></summary><div class="nav-course-links"><a href="../../lessons/stage-4/4-5-背包动态规划.html">课程内容</a><a href="../stage-4/4-5-背包动态规划.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">4.6</span><span class="course-title">动态规划进阶</span></summary><div class="nav-course-links"><a href="../../lessons/stage-4/4-6-动态规划进阶.html">课程内容</a><a href="../stage-4/4-6-动态规划进阶.html">完整代码</a></div></details></details><details class="nav-phase"><summary><span class="phase-title">阶段 5 · 图论与最短路径</span><small>带权搜索、依赖与连接</small></summary><details class="nav-course"><summary><span class="course-number">5.1</span><span class="course-title">图的遍历与连通性</span></summary><div class="nav-course-links"><a href="../../lessons/stage-5/5-1-图的遍历与连通性.html">课程内容</a><a href="../stage-5/5-1-图的遍历与连通性.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">5.2</span><span class="course-title">Dijkstra</span></summary><div class="nav-course-links"><a href="../../lessons/stage-5/5-2-Dijkstra.html">课程内容</a><a href="../stage-5/5-2-Dijkstra.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">5.3</span><span class="course-title">A*</span></summary><div class="nav-course-links"><a href="../../lessons/stage-5/5-3-A.html">课程内容</a><a href="../stage-5/5-3-A.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">5.4</span><span class="course-title">Floyd–Warshall</span></summary><div class="nav-course-links"><a href="../../lessons/stage-5/5-4-Floyd–Warshall.html">课程内容</a><a href="../stage-5/5-4-Floyd–Warshall.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">5.5</span><span class="course-title">拓扑排序</span></summary><div class="nav-course-links"><a href="../../lessons/stage-5/5-5-拓扑排序.html">课程内容</a><a href="../stage-5/5-5-拓扑排序.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">5.6</span><span class="course-title">并查集</span></summary><div class="nav-course-links"><a href="../../lessons/stage-5/5-6-并查集.html">课程内容</a><a href="../stage-5/5-6-并查集.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">5.7</span><span class="course-title">最小生成树</span></summary><div class="nav-course-links"><a href="../../lessons/stage-5/5-7-最小生成树.html">课程内容</a><a href="../stage-5/5-7-最小生成树.html">完整代码</a></div></details></details><details class="nav-phase" open><summary><span class="phase-title">阶段 6 · 机器人与自动驾驶规划算法</span><small>地图、增量修复与采样规划</small></summary><details class="nav-course"><summary><span class="course-number">6.1</span><span class="course-title">栅格地图搜索</span></summary><div class="nav-course-links"><a href="../../lessons/stage-6/6-1-栅格地图搜索.html">课程内容</a><a href="6-1-栅格地图搜索.html">完整代码</a></div></details><details class="nav-course" open><summary><span class="course-number">6.2</span><span class="course-title">动态重规划与 D* Lite</span></summary><div class="nav-course-links"><a href="../../lessons/stage-6/6-2-动态重规划与 D- Lite.html">课程内容</a><a class="active" href="6-2-动态重规划与 D- Lite.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">6.3</span><span class="course-title">RRT</span></summary><div class="nav-course-links"><a href="../../lessons/stage-6/6-3-RRT.html">课程内容</a><a href="6-3-RRT.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">6.4</span><span class="course-title">RRT*</span></summary><div class="nav-course-links"><a href="../../lessons/stage-6/6-4-RRT.html">课程内容</a><a href="6-4-RRT.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">6.5</span><span class="course-title">轨迹规划基础</span></summary><div class="nav-course-links"><a href="../../lessons/stage-6/6-5-轨迹规划基础.html">课程内容</a><a href="6-5-轨迹规划基础.html">完整代码</a></div></details></details><details class="nav-phase"><summary><span class="phase-title">阶段 7 · 算法面试与综合实战</span><small>课程规划</small></summary><div class="nav-course unavailable"><span class="course-number">7.1</span><span>常用 STL 综合训练 · 待制作</span></div><div class="nav-course unavailable"><span class="course-number">7.2</span><span>手写算法模拟面试 · 待制作</span></div><div class="nav-course unavailable"><span class="course-number">7.3</span><span>复杂度与边界分析 · 待制作</span></div><div class="nav-course unavailable"><span class="course-number">7.4</span><span>算法调试与测试 · 待制作</span></div><div class="nav-course unavailable"><span class="course-number">7.5</span><span>机器人地图搜索综合项目 · 待制作</span></div></details></nav><main class="main"><div class="eyebrow">第 6.2 课 · 完整代码</div><h1>动态重规划与 D* Lite</h1><p>下面是可独立运行的完整程序，不需要再补头文件或入口。切换语言只改变当前展示的实现。</p><a class="back-to-lesson" href="../../lessons/stage-6/6-2-动态重规划与 D- Lite.html">← 返回课程内容</a>
+<div class="code-language-switch" data-code-tabs role="tablist" aria-label="代码语言"><button type="button" id="code-tab-cpp" role="tab" aria-selected="true" aria-controls="code-panel-cpp" data-language="cpp">C++</button><button type="button" id="code-tab-python" role="tab" aria-selected="false" aria-controls="code-panel-python" data-language="python" tabindex="-1">Python</button></div>
+<section id="code-panel-cpp" class="code-language-panel" data-code-language="cpp" role="tabpanel" aria-labelledby="code-tab-cpp">
+<h2>C++ 完整实现</h2><p><a href="6-2-动态重规划与 D- Lite.cpp" download>下载 C++ 源码</a></p>
+<div class="code-block"><button type="button" class="copy-code" data-copy aria-label="复制代码" title="复制代码"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"></path></svg></button><span class="copy-status" role="status" aria-live="polite"></span><pre><code class="language-cpp">// 动态重规划与 D* Lite
+// 学习重点：先从目标反向维护“走到目标还要多少代价”。
+// 地图变化后，找出当前记录与新的一步估计不一致的格子。
+// 把这些差异按优先级传播修复，直到当前位置可据此提取路线。
+// C++17；直接编译运行 main() 中的示例。
+#include &lt;iostream&gt;  // 控制台输入与输出
+#include &lt;vector&gt;  // 动态数组、邻接表或状态表
+#include &lt;string&gt;  // 字符串存储与操作
+#include &lt;queue&gt;  // 先进先出队列或优先队列
+#include &lt;map&gt;  // 有序映射，按节点保存状态
+#include &lt;set&gt;  // 有序集合或路径内去重
+#include &lt;functional&gt;  // 递归函数包装或堆比较器
+#include &lt;algorithm&gt;  // 排序、取最值、合并或反转等标准算法
+#include &lt;utility&gt;  // 二元组、交换或移动对象
+#include &lt;limits&gt;  // 整数边界或浮点无穷大
+#include &lt;cmath&gt;  // 距离、幂、平方根或数值判断
+#include &lt;stdexcept&gt;  // 明确报告非法输入
+
+using namespace std;
+
+using Cell = pair&lt;int,int&gt;;
+using Key = pair&lt;double,double&gt;;
+const double INF = numeric_limits&lt;double&gt;::infinity();
+
+// 把相关数据与操作集中在一个类型中，避免混淆节点、状态与算法对象。
+class DStarLite {
+    vector&lt;string&gt; grid;
+    Cell start, goal, last;
+    double km = 0;
+    map&lt;Cell,double&gt; g, rhs;
+    map&lt;Cell,Key&gt; pending;
+    using Entry = pair&lt;Key,Cell&gt;;
+    priority_queue&lt;Entry,vector&lt;Entry&gt;,greater&lt;Entry&gt;&gt; heap;
+
+    // 读取状态表；尚未建立记录的顶点统一视为无穷大。
+    double value(const map&lt;Cell,double&gt;&amp; table, Cell u) const {
+        auto it = table.find(u);
+        return it == table.end() ? INF : it-&gt;second;
+    }
+    double heuristic(Cell a, Cell b) const {
+        return abs(a.first-b.first)+abs(a.second-b.second);
+    }
+    // 计算两个字段组成的关键字，先比较第一项，相等时再比较第二项。
+    Key key(Cell u) const {
+        double best = min(value(g,u),value(rhs,u));
+        return {best+heuristic(start,u)+km,best};
+    }
+    // 枚举地图内的四个相邻格；是否能穿过障碍由边代价函数进一步决定。
+    vector&lt;Cell&gt; neighbors(Cell u) const {
+        vector&lt;Cell&gt; result;
+        for (auto [dr,dc] : vector&lt;Cell&gt;{{-1,0},{1,0},{0,-1},{0,1}}) {
+            Cell v{u.first+dr,u.second+dc};
+            if (v.first &gt;= 0 &amp;&amp; v.first &lt; static_cast&lt;int&gt;(grid.size()) &amp;&amp;
+                v.second &gt;= 0 &amp;&amp; v.second &lt; static_cast&lt;int&gt;(grid[0].size())) result.push_back(v);
+        }
+        return result;
+    }
+    // 任一端点是障碍时边代价为无穷大，否则四邻域一步代价为1。
+    double cost(Cell a, Cell b) const {
+        return grid[a.first][a.second] == &#x27;#&#x27; || grid[b.first][b.second] == &#x27;#&#x27; ? INF : 1;
+    }
+    // 登记顶点当前有效关键字并压入最小堆，旧副本暂时保留。
+    void push(Cell u) {
+        pending[u] = key(u);
+        // 加入新的候选状态；允许旧记录留在堆中，由出队检查负责丢弃。
+        heap.push({pending[u],u});
+    }
+    // 在查看堆顶前丢弃过期副本，只返回当前有效的最小关键字。
+    Key top() {
+        // 反复取出一个待处理状态；集合耗尽时，本轮搜索结束。
+        while (!heap.empty()) {
+            auto [k,u] = heap.top();
+            auto it = pending.find(u);
+            if (it != pending.end() &amp;&amp; it-&gt;second == k) return k;
+            // 处理优先级最高的当前记录；是否仍有效要结合后面的条件判断。
+            heap.pop();
+        }
+        return {INF,INF};
+    }
+    // 重新计算一跳前瞻代价；只有g与rhs不一致的顶点才需要进入修复队列。
+    void update(Cell u) {
+        if (u != goal) {
+            rhs[u] = INF;
+            for (Cell v : neighbors(u)) rhs[u] = min(rhs[u],cost(u,v)+value(g,v));
+        }
+        // 删除当前有效队列登记；堆中的历史副本由top惰性丢弃。
+        pending.erase(u);
+        if (value(g,u) != value(rhs,u)) push(u);
+    }
+public:
+    DStarLite(vector&lt;string&gt; map, Cell s, Cell t) : grid(move(map)),start(s),goal(t),last(s) {
+        // 先处理空容器或无结果情况，避免访问不存在的元素。
+        if (grid.empty() || grid[0].empty()) throw invalid_argument(&quot;empty map&quot;);
+        // 不符合本算法前提的输入要明确拒绝，不能带着错误条件继续计算。
+        for (const auto&amp; row : grid) if (row.size() != grid[0].size()) throw invalid_argument(&quot;ragged map&quot;);
+        for (Cell u : {start,goal}) {
+            if (u.first &lt; 0 || u.first &gt;= static_cast&lt;int&gt;(grid.size()) ||
+                u.second &lt; 0 || u.second &gt;= static_cast&lt;int&gt;(grid[0].size()) || grid[u.first][u.second] == &#x27;#&#x27;) {
+                throw invalid_argument(&quot;invalid endpoint&quot;);
+            }
+        }
+        // 目标的一跳前瞻代价固定为0，其余未建立的状态视为无穷大。
+        rhs[goal] = 0;
+        push(goal);
+    }
+    // 传播不一致状态，直到当前位置一致，且队列没有更小关键字需要处理。
+    void repair() {
+        while (top() &lt; key(start) || value(rhs,start) != value(g,start)) {
+            auto [old,u] = heap.top();
+            // 处理优先级最高的当前记录；是否仍有效要结合后面的条件判断。
+            heap.pop();
+            // 删除当前有效队列登记；堆中的历史副本由top惰性丢弃。
+            pending.erase(u);
+            // 起点移动后关键字可能变大，先重新计算并按新键入队。
+            if (old &lt; key(u)) {
+                push(u);
+            } else if (value(g,u) &gt; value(rhs,u)) {
+                g[u] = value(rhs,u);
+                for (Cell p : neighbors(u)) update(p);
+            } else {
+                // 旧代价失效时先设为无穷大，再重新传播，不直接把坏状态当作有效答案。
+                g[u] = INF;
+                // 重新检查当前顶点是否一致；不一致才进入修复队列。
+                update(u);
+                for (Cell p : neighbors(u)) update(p);
+            }
+        }
+    }
+    // 修改一个格子的占据状态，并更新它及相邻格受影响的边代价。
+    void change(Cell u, bool blocked) {
+        // 不符合本算法前提的输入要明确拒绝，不能带着错误条件继续计算。
+        if (u == start || u == goal) throw invalid_argument(&quot;cannot block endpoint&quot;);
+        grid.at(u.first).at(u.second) = blocked ? &#x27;#&#x27; : &#x27;.&#x27;;
+        // 重新检查当前顶点是否一致；不一致才进入修复队列。
+        update(u);
+        for (Cell p : neighbors(u)) update(p);
+    }
+    // 起点移动后维护关键字偏移km，保留并复用原有搜索数据。
+    void moveStart(Cell s) {
+        // 移动起点时累加启发式偏移，复用原队列和搜索状态。
+        km += heuristic(last,s);
+        start = last = s;
+    }
+    // 沿边代价加后继g最小的方向提取路线，检测无路与异常循环。
+    vector&lt;Cell&gt; path() const {
+        if (!isfinite(value(rhs,start))) return {};
+        vector&lt;Cell&gt; route{start};
+        set&lt;Cell&gt; seen{start};
+        while (route.back() != goal) {
+            Cell u = route.back(), best{-1,-1};
+            double distance = INF;
+            for (Cell v : neighbors(u)) {
+                double candidate = cost(u,v)+value(g,v);
+                if (candidate &lt; distance) { distance = candidate; best = v; }
+            }
+            if (!isfinite(distance) || seen.count(best)) return {};
+            route.push_back(best);
+            seen.insert(best);
+        }
+        return route;
+    }
+};
+
+// 程序入口：准备示例数据，调用算法，并输出结果供手算核对。
+int main() {
+    DStarLite planner({&quot;.........&quot;,&quot;.###.###.&quot;,&quot;...#.....&quot;,&quot;...#.###.&quot;,&quot;.........&quot;,&quot;..###....&quot;},{0,0},{5,8});
+    planner.repair();
+    auto before = planner.path();
+    // 输出计算结果，便于与课程例子或自行推演的答案核对。
+    cout &lt;&lt; &quot;initial steps=&quot; &lt;&lt; before.size()-1 &lt;&lt; &#x27;\n&#x27;;
+    Cell changed = before.at(before.size()/2);
+    planner.change(changed,true);
+    planner.repair();
+    auto after = planner.path();
+    // 先处理空容器或无结果情况，避免访问不存在的元素。
+    if (after.empty()) cout &lt;&lt; &quot;unreachable\n&quot;;
+    // 输出计算结果，便于与课程例子或自行推演的答案核对。
+    else cout &lt;&lt; &quot;repaired steps=&quot; &lt;&lt; after.size()-1 &lt;&lt; &#x27;\n&#x27;;
+    planner.change(changed,false);
+    planner.repair();
+    cout &lt;&lt; &quot;restored steps=&quot; &lt;&lt; planner.path().size()-1 &lt;&lt; &#x27;\n&#x27;;
+}
+</code></pre></div>
+<h3>保存文件后怎样运行？</h3><pre class="run-command"><code>g++ -std=c++17 -O2 &quot;6-2-动态重规划与 D- Lite.cpp&quot; -o lesson.exe
+.\lesson.exe</code></pre></section><section id="code-panel-python" class="code-language-panel" data-code-language="python" role="tabpanel" aria-labelledby="code-tab-python" hidden>
+<h2>Python 完整实现</h2><p><a href="6-2-动态重规划与 D- Lite.py" download>下载 Python 源码</a></p>
+<div class="code-block"><button type="button" class="copy-code" data-copy aria-label="复制代码" title="复制代码"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"></path></svg></button><span class="copy-status" role="status" aria-live="polite"></span><pre><code class="language-python"># 动态重规划与 D* Lite
+# Python 3；直接运行文件，修改示例数据可继续练习。
+# 先从目标反向维护“走到目标还要多少代价”。
+
+import math
+import heapq
+
+# 把相关数据与操作集中在一个类型中，避免混淆节点、状态与算法对象。
+class DStarLite:
+    &quot;&quot;&quot;四邻域无向栅格；保留g/rhs，采用惰性删除过滤过期队列项。&quot;&quot;&quot;
+
+    # 初始化本对象保存的状态，后续方法将共同使用这些成员。
+    def __init__(self, grid, start, goal):
+        if not grid or not grid[0] or any((len(row) != len(grid[0]) for row in grid)):
+            # 不符合本算法前提的输入要明确拒绝，不能带着错误条件继续计算。
+            raise ValueError(&#x27;地图必须是非空矩形&#x27;)
+        if any((not (0 &lt;= r &lt; len(grid) and 0 &lt;= c &lt; len(grid[0])) for r, c in (start, goal))):
+            raise ValueError(&#x27;起终点不能超出地图&#x27;)
+        if any((grid[r][c] == &#x27;#&#x27; for r, c in (start, goal))):
+            raise ValueError(&#x27;起终点必须可通行&#x27;)
+        self.grid = [list(row) for row in grid]
+        self.start, self.goal, self.last = (start, goal, start)
+        self.km = 0
+        # 目标的一跳前瞻代价固定为0，其余未建立的状态视为无穷大。
+        self.g, self.rhs = ({}, {goal: 0})
+        self.heap, self.pending = ([], {})
+        self.push(goal)
+
+    # 计算两格之间的曼哈顿距离，作为一致的剩余代价下界。
+    def h(self, a, b):
+        return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+    # 读取状态表；尚未建立记录的顶点统一视为无穷大。
+    def value(self, table, u):
+        return table.get(u, math.inf)
+
+    # 计算两个字段组成的关键字，先比较第一项，相等时再比较第二项。
+    def key(self, u):
+        best = min(self.value(self.g, u), self.value(self.rhs, u))
+        return (best + self.h(self.start, u) + self.km, best)
+
+    # 枚举地图内的四个相邻格；是否能穿过障碍由边代价函数进一步决定。
+    def neighbors(self, u):
+        r, c = u
+        return [(a, b) for a, b in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)) if 0 &lt;= a &lt; len(self.grid) and 0 &lt;= b &lt; len(self.grid[0])]
+
+    # 任一端点是障碍时边代价为无穷大，否则四邻域一步代价为1。
+    def cost(self, u, v):
+        return math.inf if self.grid[u[0]][u[1]] == &#x27;#&#x27; or self.grid[v[0]][v[1]] == &#x27;#&#x27; else 1
+
+    # 登记顶点当前有效关键字并压入最小堆，旧副本暂时保留。
+    def push(self, u):
+        key = self.key(u)
+        self.pending[u] = key
+        # 加入新的候选状态；允许旧记录留在堆中，由出队检查负责丢弃。
+        heapq.heappush(self.heap, (key, u))
+
+    # 在查看堆顶前丢弃过期副本，只返回当前有效的最小关键字。
+    def top(self):
+        # 反复取出一个待处理状态；集合耗尽时，本轮搜索结束。
+        while self.heap and self.pending.get(self.heap[0][1]) != self.heap[0][0]:
+            # 处理优先级最高的当前记录；是否仍有效要结合后面的条件判断。
+            heapq.heappop(self.heap)
+        return self.heap[0][0] if self.heap else (math.inf, math.inf)
+
+    # 重新计算一跳前瞻代价；只有g与rhs不一致的顶点才需要进入修复队列。
+    def update(self, u):
+        if u != self.goal:
+            self.rhs[u] = min((self.cost(u, v) + self.value(self.g, v) for v in self.neighbors(u)), default=math.inf)
+        # 删除当前有效队列登记；堆中的历史副本由top惰性丢弃。
+        self.pending.pop(u, None)
+        if self.value(self.g, u) != self.value(self.rhs, u):
+            self.push(u)
+
+    # 传播不一致状态，直到当前位置一致，且队列没有更小关键字需要处理。
+    def repair(self):
+        while self.top() &lt; self.key(self.start) or self.value(self.rhs, self.start) != self.value(self.g, self.start):
+            # 处理优先级最高的当前记录；是否仍有效要结合后面的条件判断。
+            old, u = heapq.heappop(self.heap)
+            # 删除当前有效队列登记；堆中的历史副本由top惰性丢弃。
+            self.pending.pop(u, None)
+            # 起点移动后关键字可能变大，先重新计算并按新键入队。
+            if old &lt; self.key(u):
+                self.push(u)
+            elif self.value(self.g, u) &gt; self.value(self.rhs, u):
+                self.g[u] = self.value(self.rhs, u)
+                for p in self.neighbors(u):
+                    self.update(p)
+            else:
+                # 旧代价失效时先设为无穷大，再重新传播，不直接把坏状态当作有效答案。
+                self.g[u] = math.inf
+                # 重新检查当前顶点是否一致；不一致才进入修复队列。
+                self.update(u)
+                for p in self.neighbors(u):
+                    self.update(p)
+
+    # 修改一个格子的占据状态，并更新它及相邻格受影响的边代价。
+    def change(self, cell, blocked):
+        if cell in (self.start, self.goal):
+            # 不符合本算法前提的输入要明确拒绝，不能带着错误条件继续计算。
+            raise ValueError(&#x27;不能把当前位置或目标设为障碍&#x27;)
+        self.grid[cell[0]][cell[1]] = &#x27;#&#x27; if blocked else &#x27;.&#x27;
+        for u in [cell] + self.neighbors(cell):
+            # 重新检查当前顶点是否一致；不一致才进入修复队列。
+            self.update(u)
+
+    # 起点移动后维护关键字偏移km，保留并复用原有搜索数据。
+    def move(self, start):
+        # 移动起点时累加启发式偏移，复用原队列和搜索状态。
+        self.km += self.h(self.last, start)
+        self.start = self.last = start
+
+    # 沿边代价加后继g最小的方向提取路线，检测无路与异常循环。
+    def path(self):
+        if not math.isfinite(self.value(self.rhs, self.start)):
+            return []
+        route, seen = ([self.start], {self.start})
+        while route[-1] != self.goal:
+            u = route[-1]
+            v = min(self.neighbors(u), key=lambda v: self.cost(u, v) + self.value(self.g, v))
+            if v in seen or not math.isfinite(self.cost(u, v) + self.value(self.g, v)):
+                return []
+            route.append(v)
+            seen.add(v)
+        return route
+
+# 程序入口：准备示例数据，调用算法，并输出结果供手算核对。
+def main():
+    grid = [&#x27;.........&#x27;, &#x27;.###.###.&#x27;, &#x27;...#.....&#x27;, &#x27;...#.###.&#x27;, &#x27;.........&#x27;, &#x27;..###....&#x27;]
+    planner = DStarLite(grid, (0, 0), (5, 8))
+    planner.repair()
+    before = planner.path()
+    # 输出计算结果，便于与课程例子或自行推演的答案核对。
+    print(&#x27;initial:&#x27;, before)
+    changed = before[len(before) // 2]
+    planner.change(changed, True)
+    planner.repair()
+    print(&#x27;repaired:&#x27;, planner.path())
+    planner.change(changed, False)
+    planner.move(before[1])
+    planner.repair()
+    print(&#x27;restored and moved:&#x27;, planner.path())
+if __name__ == &#x27;__main__&#x27;:
+    main()
+</code></pre></div>
+<h3>保存文件后怎样运行？</h3><pre class="run-command"><code>python &quot;6-2-动态重规划与 D- Lite.py&quot;</code></pre></section><h2>写代码时最容易错的地方</h2><div class="mistake-example"><h3>每次重跑 A* 当作增量修复</h3><p>地图新增障碍，比较重新搜索与复用旧状态。</p><strong>容易写错</strong><pre><code>planner = AStar(new_map);
+planner.search(); // 称为 D* Lite</code></pre><strong>修改后</strong><pre><code>planner.updateEdgeCosts(changes);
+planner.computeShortestPath(); // 伪代码：复用 D* Lite 状态</code></pre><p>重新创建 A* 并未复用 g、rhs 与待修复队列。</p><a class="implementation-button" href="../../lessons/stage-6/6-2-动态重规划与 D- Lite.html?mistake=1#demo">查看此错误的过程演示 →</a></div><div class="mistake-example"><h3>起点移动未更新 km</h3><p>起点从 s_old 移到 s_new，启发式基准改变。</p><strong>容易写错</strong><pre><code>start = new_start; // 漏掉 km 更新</code></pre><strong>修改后</strong><pre><code>km += heuristic(last_start, new_start);
+last_start = new_start;
+start = new_start;</code></pre><p>D* Lite 用 km 补偿起点移动引起的关键字变化；具体调用须与实现约定一致。</p><a class="implementation-button" href="../../lessons/stage-6/6-2-动态重规划与 D- Lite.html?mistake=2#demo">查看此错误的过程演示 →</a></div><h3>运行后怎样检查？</h3><p>双关键字按字典序比较。机器人移动时 km += h(last,start)；边代价变化要更新所有受影响顶点。无路应检查 <span class="math-inline">$\operatorname{rhs}(start)$</span> 为∞。</p><details class="answer"><summary>参考与拓展阅读</summary><p>以下资料用于核对题意、适用条件与常见边界；本站例子与讲解按教学顺序重新组织。</p><ul><li><a href="https://idm-lab.org/bib/abstracts/Koen02e.html" target="_blank" rel="noopener noreferrer">D* Lite 原论文与勘误</a></li></ul></details></main></div></body></html>

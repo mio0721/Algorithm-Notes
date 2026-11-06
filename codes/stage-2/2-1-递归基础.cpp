@@ -1,18 +1,22 @@
-#include <iostream>
-#include <vector>
-#include <queue>
-#include <stack>
-#include <unordered_map>
-#include <functional>
-#include <algorithm>
+// 递归基础
+// 学习重点：先规定最小任务直接返回什么。
+// 大任务只调用一个更小的同类任务。
+// 等小任务返回，再补上当前这一层的工作。
+// C++17；直接编译运行 main() 中的示例。
+#include <iostream>  // 控制台输入与输出
+
 using namespace std;
 
 int sum(int n) {
+    // 基例直接返回，不再调用自己；这是递归能够结束的原因。
     if (n == 0) return 0;
+    // 把任务缩小一层，等它返回后再加上本层。
     return n + sum(n - 1);
 }
 
+// 程序入口：准备示例数据，调用算法，并输出结果供手算核对。
 int main() {
+    // 输出计算结果，便于与课程例子或自行推演的答案核对。
     cout << "sum(3) = " << sum(3) << "\n";
     return 0;
 }

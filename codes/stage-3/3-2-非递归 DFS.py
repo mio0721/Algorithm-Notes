@@ -1,10 +1,18 @@
+# 非递归 DFS
+# Python 3；直接运行文件，修改示例数据可继续练习。
+# 把起点加入栈并标记。
+
 g = [[1, 2], [0, 3, 4], [0, 5, 6], [1, 7], [1, 8, 5], [2, 4], [2, 9], [3], [4, 9], [6, 8]]
-seen, stack = {0}, [0]
+seen, stack = ({0}, [0])
+# 反复取出一个待处理状态；集合耗尽时，本轮搜索结束。
 while stack:
     u = stack.pop()
-    print(chr(65 + u), end=" ")
+    # 输出计算结果，便于与课程例子或自行推演的答案核对。
+    print(chr(65 + u), end=' ')
+    # 栈后进先出；想先访问的邻居应后压入。
     for v in reversed(g[u]):
         if v not in seen:
             seen.add(v)
             stack.append(v)
+# 输出计算结果，便于与课程例子或自行推演的答案核对。
 print()

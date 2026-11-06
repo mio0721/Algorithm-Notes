@@ -47,8 +47,8 @@ function graphTrace(id,data){
  edges.forEach(([a,b])=>{g[a].push(b);if(!directed)g[b].push(a);});g.forEach(a=>a.sort((a,b)=>a-b));
  const {positions,viewBox}=layoutGraph(g,start);
  const diagram={nodes:positions.map(([x,y],i)=>[label(i),x,y]),edges,directed,viewBox};
- const frames=[],seen=new Set(),order=[],path=[];const show=a=>a.map(label).join(' → ')||'空';
- const add=(text,highlight=[],cells=[],partial=diagram)=>{if(frames.length<450)frames.push({text,highlight:[...highlight],cells:[...cells],active:[],diagram:partial});};
+ const frames=[],seen=new Set(),order=[],path=[],depthRecords=Array(count).fill(-1),parentRecords=Array(count).fill(-1);const show=a=>a.map(label).join(' → ')||'空';
+ const add=(text,highlight=[],cells=[],partial=diagram)=>{if(frames.length<450)frames.push({text,highlight:[...highlight],cells:[...cells],active:[],diagram:partial,distances:[...depthRecords],parents:[...parentRecords],visited:[...seen],nodeNotes:id==='3.3'?Object.fromEntries(Array.from({length:count},(_,u)=>[u,seen.has(u)?['路径内',parentRecords[u]>=0?'来自 '+label(parentRecords[u]):'起点']:['不在路径内']])):undefined,distanceLabel:['3.1','3.2','3.3','2.6'].includes(id)?'深度':'d'});};
  add(`${count} 个节点；${directed?'有向':'无向'}图。从 ${label(start)} 出发。`,[],[],id==='2.5'?{...diagram,edges:[]}:diagram);
  if(id==='2.5'){
   const adj=Array.from({length:count},()=>[]);
@@ -58,26 +58,26 @@ function graphTrace(id,data){
  if(id==='2.4'){edges.forEach(([a,b])=>{add(`观察 ${label(a)} → ${label(b)}；反向不自动成立。`,[a,b]);frames.at(-1).route=[a,b];});return frames;}
  if(id==='3.3'){
   let paths=0,truncated=false;const results=[];
-  const dfs=u=>{if(frames.length>=440){truncated=true;return;}seen.add(u);path.push(u);add(`选择 ${label(u)}`,path,['当前路径：'+show(path)]);
+  const dfs=u=>{if(frames.length>=440){truncated=true;return;}seen.add(u);parentRecords[u]=path.at(-1)??-1;path.push(u);add(`选择 ${label(u)}`,path,['当前路径：'+show(path)]);
    if(u===goal){paths++;results.push([...path]);add(`找到第 ${paths} 条路径。`,path,['结果：'+show(path)]);frames.at(-1).route=[...path];}
    else for(const v of g[u])if(!seen.has(v))dfs(v);
    path.pop();seen.delete(u);add(`撤销 ${label(u)}`,path,['当前路径：'+show(path)]);
   };dfs(start);add(truncated?`路径较多，演示已截取前 440 步；已找到 ${paths} 条路径。`:`结束，共找到 ${paths} 条简单路径。`,results[0]||[],[]);frames.at(-1).routes=results;return frames;
  }
  if(id==='3.1'||id==='2.6'){
-  const dfs=u=>{seen.add(u);path.push(u);order.push(u);add(`进入 ${label(u)}，立即标记。`,[u],['调用栈：'+show(path),'访问顺序：'+show(order)]);for(const v of g[u])if(!seen.has(v))dfs(v);path.pop();add(`从 ${label(u)} 返回。`,path.slice(-1),['调用栈：'+show(path)]);};dfs(start);
+  const dfs=u=>{seen.add(u);path.push(u);order.push(u);add(`进入 ${label(u)}，立即标记。`,[u],['调用栈：'+show(path),'访问顺序：'+show(order)]);for(const v of g[u])if(!seen.has(v)){parentRecords[v]=u;depthRecords[v]=depthRecords[u]+1;dfs(v);}path.pop();add(`从 ${label(u)} 返回。`,path.slice(-1),['调用栈：'+show(path)]);};depthRecords[start]=0;dfs(start);
  }else if(id==='3.2'){
-  const stack=[start];seen.add(start);while(stack.length){const u=stack.pop();order.push(u);for(const v of [...g[u]].reverse())if(!seen.has(v)){seen.add(v);stack.push(v);}add(`处理 ${label(u)}；右端为栈顶。`,[u],['栈：'+show(stack),'访问顺序：'+show(order)]);}
+  const stack=[start];seen.add(start);depthRecords[start]=0;while(stack.length){const u=stack.pop();order.push(u);for(const v of [...g[u]].reverse())if(!seen.has(v)){seen.add(v);depthRecords[v]=depthRecords[u]+1;parentRecords[v]=u;stack.push(v);}add(`处理 ${label(u)}；右端为栈顶。`,[u],['栈：'+show(stack),'访问顺序：'+show(order)]);}
  }else{
-  const queue=[start],dist=Array(count).fill(-1),parent=Array(count).fill(-1);dist[start]=0;seen.add(start);let depth=0;
+  const queue=[start],dist=depthRecords,parent=parentRecords;dist[start]=0;seen.add(start);let depth=0;
   while(queue.length){
    const size=(id==='3.5'||id==='2.3')?queue.length:1,layer=[];
    for(let i=0;i<size;i++){const u=queue.shift();order.push(u);layer.push(u);for(const v of g[u])if(!seen.has(v)){seen.add(v);dist[v]=dist[u]+1;parent[v]=u;queue.push(v);}}
-   add(size===1?`处理 ${show(layer)}，距离 ${dist[layer[0]]}。`:`第 ${depth} 层：${show(layer)}`,layer,['队列：'+show(queue),'访问顺序：'+show(order)]);depth++;
+   add(size===1?`处理 ${show(layer)}，距离 ${dist[layer[0]]}。`:`第 ${depth} 层：${show(layer)}`,layer,['队列：'+show(queue),'访问顺序：'+show(order)]);frames.at(-1).distances=[...dist];frames.at(-1).parents=[...parent];depth++;
   }
   if(id==='3.6'){
    if(dist[goal]<0)add(`${label(goal)} 不可达：没有路径。`);
-   else{let u=goal;while(u!==-1){path.push(u);u=parent[u];}path.reverse();add(`最短路径 ${dist[goal]} 步。`,path,['路径：'+show(path)]);frames.at(-1).route=[...path];}return frames;
+   else{let u=goal;while(u!==-1){path.push(u);u=parent[u];}path.reverse();add(`最短路径 ${dist[goal]} 步。`,path,['路径：'+show(path)]);frames.at(-1).route=[...path];frames.at(-1).distances=[...dist];frames.at(-1).parents=[...parent];}return frames;
   }
  }
  add(`本次访问 ${seen.size}/${count} 个节点。${seen.size<count?'其他节点从当前起点不可达。':'所有节点均可达。'}`,[],['访问顺序：'+show(order)]);return frames;
@@ -93,11 +93,11 @@ function parseGrid(text){
 function gridTrace(id,data){
  const {grid,start,goal}=data,R=grid.length,C=grid[0].length,frames=[],seen=new Set(),pending=[],path=[],dist={},parent={};
  const key=p=>p.join(','),eq=(a,b)=>key(a)===key(b),cells=()=>[...seen].map(k=>k.split(',').map(Number));
- const add=(text,current=null,route=[])=>frames.push({text,cells:[],active:[],grid,start,goal,visited:cells(),current,route:route.map(p=>[...p]),frontier:pending.map(p=>[...p]),distances:{...dist}});
+ const add=(text,current=null,route=[])=>frames.push({text,cells:[],active:[],grid,start,goal,visited:cells(),current,route:route.map(p=>[...p]),frontier:pending.map(p=>[...p]),distances:{...dist},parents:Object.fromEntries(Object.entries(parent).map(([k,p])=>[k,p.join(",")]))});
  const neighbors=([r,c])=>[[r+1,c],[r-1,c],[r,c+1],[r,c-1]].filter(([r,c])=>r>=0&&r<R&&c>=0&&c<C&&grid[r][c]!=='#');
  add('S 为起点、T 为终点。点击格子可以编辑地图，再观察搜索过程。');
  if(id==='3.7'){
-  const dfs=p=>{seen.add(key(p));path.push(p);add(`进入 (${p})`,p,path);if(eq(p,goal)){add(`找到一条 ${path.length-1} 步的路径；DFS 不保证最短。`,p,path);return true;}for(const v of neighbors(p))if(!seen.has(key(v))&&dfs(v))return true;path.pop();add(`从 (${p}) 回退。`,path.at(-1)||null,path);return false;};
+  const dfs=p=>{seen.add(key(p));path.push(p);dist[key(p)]=path.length-1;add(`进入 (${p})`,p,path);if(eq(p,goal)){add(`找到一条 ${path.length-1} 步的路径；DFS 不保证最短。`,p,path);return true;}for(const v of neighbors(p))if(!seen.has(key(v))){parent[key(v)]=p;if(dfs(v))return true;}path.pop();add(`从 (${p}) 回退。`,path.at(-1)||null,path);return false;};
   if(!dfs(start))add('搜索结束：终点不可达。');
  }else{
   pending.push(start);seen.add(key(start));dist[key(start)]=0;
@@ -122,23 +122,48 @@ function mount(root,id,update){
   panel.querySelector('[data-grid-rows]').value=gridRows.length;panel.querySelector('[data-grid-cols]').value=gridRows[0].length;const shape=panel.querySelector('[data-grid-shape]'),dimensions=gridRows.length+','+gridRows[0].length;shape.value=[...shape.options].some(option=>option.value===dimensions)?dimensions:'custom';
  };
  const tbody=panel.querySelector('.edge-table tbody');
+ let caseLabels=null;
  const addRow=(a=0,b=1)=>{
   const row=document.createElement('tr');
   for(const [column,value] of [[0,a],[1,b]]){
    const cell=document.createElement('td'),select=document.createElement('select');
    const count=Math.min(12,Math.max(1,Number(panel.querySelector('[data-node-count]').value)||1));
-   for(let n=0;n<Math.max(count,value+1);n++){const option=document.createElement('option');option.value=n;option.textContent=label(n);select.appendChild(option);}
+   for(let n=0;n<Math.max(count,value+1);n++){const option=document.createElement('option');option.value=n;option.textContent=caseLabels?.[n]||label(n);select.appendChild(option);}
    select.value=value;select.setAttribute('aria-label',column===0?'边的起点':'边的终点');cell.appendChild(select);row.appendChild(cell);
   }
   const cell=document.createElement('td'),remove=document.createElement('button');remove.type='button';remove.textContent='删除';remove.setAttribute('aria-label','删除这条边');remove.addEventListener('click',()=>row.remove());cell.appendChild(remove);row.appendChild(cell);tbody.appendChild(row);
  };
  const setEdges=edges=>{tbody.replaceChildren();edges.forEach(([a,b])=>addRow(a,b));};
  const edgeText=()=>[...tbody.rows].map(row=>[...row.querySelectorAll('select')].map(s=>s.value).join(' ')).join('\n');
+ let editorBackup=null;
+ root.addEventListener('mistake-editor',event=>{
+  const {active,frame:f}=event.detail;
+  if(active){
+   if(!editorBackup)editorBackup=isGrid?{grid:gridText()}:{edges:edgeText().split('\n').filter(Boolean).map(row=>row.split(' ').map(Number))};
+   if(isGrid){
+    if(f.grid){const rows=f.grid.map(row=>[...row]);rows[f.start[0]][f.start[1]]='S';rows[f.goal[0]][f.goal[1]]='T';setGridText(rows.map(row=>row.join('')).join('\n'));}
+    else panel.querySelector('[data-grid-editor]').replaceChildren();
+   }else{
+    const d=f.network||f.diagram;
+    caseLabels=d?.nodes.map(n=>n[0])||[];
+    panel.querySelector('[data-node-count]').value=d?.nodes.length||0;
+    panel.querySelector('[data-start]').value=caseLabels[0]||'不适用：此例演示栈/列表';
+    if(panel.querySelector('[data-goal]'))panel.querySelector('[data-goal]').value=caseLabels.at(-1)||'不适用';
+    setEdges(d?.edges||[]);
+   }
+   panel.querySelectorAll('input,button,select:not([data-map-preset])').forEach(el=>el.disabled=true);
+  }else{
+   caseLabels=null;
+   panel.querySelectorAll('input,button,select:not([data-map-preset])').forEach(el=>el.disabled=false);
+   if(editorBackup){if(isGrid)setGridText(editorBackup.grid);else setEdges(editorBackup.edges);editorBackup=null;}
+  }
+ });
  if(!isGrid)panel.querySelector('[data-add-edge]').addEventListener('click',()=>addRow(0,Number(panel.querySelector('[data-node-count]').value)>1?1:0));
  const run=()=>{try{const data=isGrid?parseGrid(gridText()):graphData(Number(panel.querySelector('[data-node-count]').value),edgeText(),panel.querySelector('[data-start]').value,panel.querySelector('[data-goal]')?.value||panel.querySelector('[data-start]').value,treeMode);const frames=isGrid?gridTrace(id,data):graphTrace(id,data);error.textContent='';update(frames);}catch(e){error.textContent=e.message;}};
  const fill=()=>{if(isGrid)setGridText(grids[preset.value]);else{let edges=graphCases[preset.value];if(preset.value==='default'&&treeMode)edges=tree;panel.querySelector('[data-node-count]').value=preset.value==='single'?1:10;panel.querySelector('[data-start]').value='A';if(panel.querySelector('[data-goal]'))panel.querySelector('[data-goal]').value=preset.value==='single'?'A':'J';setEdges(edges);}run();};
  apply.addEventListener('click',run);preset.addEventListener('change',fill);
  if(isGrid)root.addEventListener('click',event=>{
+  if(root.classList.contains('mistake-active'))return;
   const cell=event.target.closest('[data-grid-row],[data-editor-row]');if(!cell)return;
   try{parseGrid(gridText());const rows=gridRows.map(row=>[...row]),r=Number(cell.dataset.editorRow??cell.dataset.gridRow),c=Number(cell.dataset.editorCol??cell.dataset.gridCol),mode=panel.querySelector('[data-edit-mode]').value;if(!rows[r]||rows[r][c]===undefined)return;
    if(mode==='wall'){if('ST'.includes(rows[r][c]))return;rows[r][c]=rows[r][c]==='#'?'.':'#';}else{const symbol=mode==='start'?'S':'T';if(rows[r][c]===(symbol==='S'?'T':'S'))return;rows.forEach(row=>row.forEach((x,i)=>{if(x===symbol)row[i]='.';}));rows[r][c]=symbol;}
@@ -161,6 +186,7 @@ function mount(root,id,update){
   const cancel=()=>{if(preview)preview.remove();preview=null;dragging=null;view.classList.remove('link-dragging');};
   const point=event=>{const svg=view.querySelector('svg'),p=svg.createSVGPoint();p.x=event.clientX;p.y=event.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());};
   view.addEventListener('pointerdown',event=>{
+   if(root.classList.contains('mistake-active'))return;
    const node=event.target.closest('[data-node]');if(!node||event.button!==0)return;
    event.preventDefault();root.dispatchEvent(new Event('graph-edit-start'));dragging={node:Number(node.dataset.node),x:Number(node.getAttribute('cx')),y:Number(node.getAttribute('cy')),pointer:event.pointerId};view.setPointerCapture(event.pointerId);view.classList.add('link-dragging');
    preview=document.createElementNS('http://www.w3.org/2000/svg','line');preview.classList.add('edge-preview');preview.setAttribute('x1',dragging.x);preview.setAttribute('y1',dragging.y);preview.setAttribute('x2',dragging.x);preview.setAttribute('y2',dragging.y);view.querySelector('svg').appendChild(preview);

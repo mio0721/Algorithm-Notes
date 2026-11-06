@@ -1,22 +1,30 @@
-#include <iostream>
-#include <vector>
-#include <queue>
-#include <stack>
-#include <unordered_map>
-#include <functional>
-#include <algorithm>
+// 函数调用栈与递归返回
+// 学习重点：进入函数时，把本层参数和暂停位置放入调用栈。
+// 调用下一层后，本层先等待。
+// 下一层返回时，本层从暂停处继续执行。
+// C++17；直接编译运行 main() 中的示例。
+#include <iostream>  // 控制台输入与输出
+
 using namespace std;
 
 int sum(int n) {
+    // 输出计算结果，便于与课程例子或自行推演的答案核对。
     cout << "进入 " << n << "\n";
+    // 下层结果回来后，才计算本层并继续向上一层返回。
     if (n == 0) return 0;
+    // 此处调用下一层时，本层会暂停，局部参数仍保存在调用栈中。
     int smaller = sum(n - 1);
+    // 输出计算结果，便于与课程例子或自行推演的答案核对。
     cout << "返回 " << n << "\n";
+    // 此处调用下一层时，本层会暂停，局部参数仍保存在调用栈中。
     return n + smaller;
 }
 
+// 程序入口：准备示例数据，调用算法，并输出结果供手算核对。
 int main() {
     int result=sum(2);
+    // 输出计算结果，便于与课程例子或自行推演的答案核对。
     cout << "结果: " << result << "\n";
+    // 下层结果回来后，才计算本层并继续向上一层返回。
     return 0;
 }

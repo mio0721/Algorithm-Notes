@@ -1,0 +1,244 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RRT* · 完整代码 · 算法笔记</title><script>try{document.documentElement.dataset.theme=localStorage.getItem('algorithm-notes-theme')||'light'}catch(e){}</script><link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg"><link rel="stylesheet" href="../../assets/style.css"><script>window.MathJax={tex:{inlineMath:[['$','$']],displayMath:[['$$','$$']],processEscapes:true,packages:{'[+]':['base','ams']}},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer src="../../assets/mathjax-tex-svg.js"></script><script defer src="../../assets/traces.js"></script><script defer src="../../assets/extra-traces.js"></script><script defer src="../../assets/search-playground.js"></script><script defer src="../../assets/advanced-playground.js"></script><script defer src="../../assets/app.js"></script></head><body><header class="mast"><div class="mast-inner"><a class="brand" href="../../index.html">算法与数据结构：从基础到机器人路径规划</a><button class="theme theme-toggle" id="theme-toggle" type="button" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">夜间模式</span></button></div></header><div class="layout"><nav class="sidebar" aria-label="课程目录"><div class="sidebar-title">课程总目录</div><a class="nav-home" href="../../index.html">首页 · 课程目录</a><div class="group-label">按学习阶段查看</div><details class="nav-phase"><summary><span class="phase-title">阶段 0 · 算法基础与 C++ STL</span><small>穿插学习</small></summary><details class="nav-course"><summary><span class="course-number">0.1</span><span class="course-title">算法与时间复杂度</span></summary><div class="nav-course-links"><a href="../../lessons/stage-0/0-1-算法与时间复杂度.html">课程内容</a><a href="../stage-0/0-1-算法与时间复杂度.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">0.2</span><span class="course-title">vector 与数组</span></summary><div class="nav-course-links"><a href="../../lessons/stage-0/0-2-vector 与数组.html">课程内容</a><a href="../stage-0/0-2-vector 与数组.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">0.3</span><span class="course-title">哈希表</span></summary><div class="nav-course-links"><a href="../../lessons/stage-0/0-3-哈希表.html">课程内容</a><a href="../stage-0/0-3-哈希表.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">0.4</span><span class="course-title">栈与队列</span></summary><div class="nav-course-links"><a href="../../lessons/stage-0/0-4-栈与队列.html">课程内容</a><a href="../stage-0/0-4-栈与队列.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">0.5</span><span class="course-title">堆与优先队列</span></summary><div class="nav-course-links"><a href="../../lessons/stage-0/0-5-堆与优先队列.html">课程内容</a><a href="../stage-0/0-5-堆与优先队列.html">完整代码</a></div></details></details><details class="nav-phase"><summary><span class="phase-title">阶段 1 · 数组、查找与双指针</span><small>数组、查找与指针技巧</small></summary><details class="nav-course"><summary><span class="course-number">1.1</span><span class="course-title">二分查找</span></summary><div class="nav-course-links"><a href="../../lessons/stage-1/1-1-二分查找.html">课程内容</a><a href="../stage-1/1-1-二分查找.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">1.2</span><span class="course-title">二分边界与插入位置</span></summary><div class="nav-course-links"><a href="../../lessons/stage-1/1-2-二分边界与插入位置.html">课程内容</a><a href="../stage-1/1-2-二分边界与插入位置.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">1.3</span><span class="course-title">相向双指针</span></summary><div class="nav-course-links"><a href="../../lessons/stage-1/1-3-相向双指针.html">课程内容</a><a href="../stage-1/1-3-相向双指针.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">1.4</span><span class="course-title">快慢指针：数组去重</span></summary><div class="nav-course-links"><a href="../../lessons/stage-1/1-4-快慢指针：数组去重.html">课程内容</a><a href="../stage-1/1-4-快慢指针：数组去重.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">1.5</span><span class="course-title">快慢指针：原地移除</span></summary><div class="nav-course-links"><a href="../../lessons/stage-1/1-5-快慢指针：原地移除.html">课程内容</a><a href="../stage-1/1-5-快慢指针：原地移除.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">1.6</span><span class="course-title">滑动窗口：长度最小的子数组</span></summary><div class="nav-course-links"><a href="../../lessons/stage-1/1-6-滑动窗口：长度最小的子数组.html">课程内容</a><a href="../stage-1/1-6-滑动窗口：长度最小的子数组.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">1.7</span><span class="course-title">滑动窗口与哈希表</span></summary><div class="nav-course-links"><a href="../../lessons/stage-1/1-7-滑动窗口与哈希表.html">课程内容</a><a href="../stage-1/1-7-滑动窗口与哈希表.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">1.8</span><span class="course-title">排序算法</span></summary><div class="nav-course-links"><a href="../../lessons/stage-1/1-8-排序算法.html">课程内容</a><a href="../stage-1/1-8-排序算法.html">完整代码</a></div></details></details><details class="nav-phase"><summary><span class="phase-title">阶段 2 · 递归、树与图的基础</span><small>递归、树和图的基本概念</small></summary><details class="nav-course"><summary><span class="course-number">2.1</span><span class="course-title">递归基础</span></summary><div class="nav-course-links"><a href="../../lessons/stage-2/2-1-递归基础.html">课程内容</a><a href="../stage-2/2-1-递归基础.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">2.2</span><span class="course-title">函数调用栈与递归返回</span></summary><div class="nav-course-links"><a href="../../lessons/stage-2/2-2-函数调用栈与递归返回.html">课程内容</a><a href="../stage-2/2-2-函数调用栈与递归返回.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">2.3</span><span class="course-title">树的基本结构</span></summary><div class="nav-course-links"><a href="../../lessons/stage-2/2-3-树的基本结构.html">课程内容</a><a href="../stage-2/2-3-树的基本结构.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">2.4</span><span class="course-title">图的基本结构</span></summary><div class="nav-course-links"><a href="../../lessons/stage-2/2-4-图的基本结构.html">课程内容</a><a href="../stage-2/2-4-图的基本结构.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">2.5</span><span class="course-title">图的存储：邻接表与邻接矩阵</span></summary><div class="nav-course-links"><a href="../../lessons/stage-2/2-5-图的存储：邻接表与邻接矩阵.html">课程内容</a><a href="../stage-2/2-5-图的存储：邻接表与邻接矩阵.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">2.6</span><span class="course-title">visited 访问标记</span></summary><div class="nav-course-links"><a href="../../lessons/stage-2/2-6-visited 访问标记.html">课程内容</a><a href="../stage-2/2-6-visited 访问标记.html">完整代码</a></div></details></details><details class="nav-phase"><summary><span class="phase-title">阶段 3 · DFS 与 BFS 搜索算法</span><small>学习搜索算法与图遍历</small></summary><details class="nav-course"><summary><span class="course-number">3.1</span><span class="course-title">递归 DFS</span></summary><div class="nav-course-links"><a href="../../lessons/stage-3/3-1-递归 DFS.html">课程内容</a><a href="../stage-3/3-1-递归 DFS.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">3.2</span><span class="course-title">非递归 DFS</span></summary><div class="nav-course-links"><a href="../../lessons/stage-3/3-2-非递归 DFS.html">课程内容</a><a href="../stage-3/3-2-非递归 DFS.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">3.3</span><span class="course-title">DFS 与回溯</span></summary><div class="nav-course-links"><a href="../../lessons/stage-3/3-3-DFS 与回溯.html">课程内容</a><a href="../stage-3/3-3-DFS 与回溯.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">3.4</span><span class="course-title">队列 BFS</span></summary><div class="nav-course-links"><a href="../../lessons/stage-3/3-4-队列 BFS.html">课程内容</a><a href="../stage-3/3-4-队列 BFS.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">3.5</span><span class="course-title">树的层序遍历</span></summary><div class="nav-course-links"><a href="../../lessons/stage-3/3-5-树的层序遍历.html">课程内容</a><a href="../stage-3/3-5-树的层序遍历.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">3.6</span><span class="course-title">无权图最短路径</span></summary><div class="nav-course-links"><a href="../../lessons/stage-3/3-6-无权图最短路径.html">课程内容</a><a href="../stage-3/3-6-无权图最短路径.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">3.7</span><span class="course-title">二维地图 DFS</span></summary><div class="nav-course-links"><a href="../../lessons/stage-3/3-7-二维地图 DFS.html">课程内容</a><a href="../stage-3/3-7-二维地图 DFS.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">3.8</span><span class="course-title">二维地图 BFS 与对比</span></summary><div class="nav-course-links"><a href="../../lessons/stage-3/3-8-二维地图 BFS 与对比.html">课程内容</a><a href="../stage-3/3-8-二维地图 BFS 与对比.html">完整代码</a></div></details></details><details class="nav-phase"><summary><span class="phase-title">阶段 4 · 经典算法设计思想</span><small>回溯、贪心、分治与动态规划</small></summary><details class="nav-course"><summary><span class="course-number">4.1</span><span class="course-title">回溯算法</span></summary><div class="nav-course-links"><a href="../../lessons/stage-4/4-1-回溯算法.html">课程内容</a><a href="../stage-4/4-1-回溯算法.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">4.2</span><span class="course-title">贪心算法</span></summary><div class="nav-course-links"><a href="../../lessons/stage-4/4-2-贪心算法.html">课程内容</a><a href="../stage-4/4-2-贪心算法.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">4.3</span><span class="course-title">分治算法</span></summary><div class="nav-course-links"><a href="../../lessons/stage-4/4-3-分治算法.html">课程内容</a><a href="../stage-4/4-3-分治算法.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">4.4</span><span class="course-title">动态规划基础</span></summary><div class="nav-course-links"><a href="../../lessons/stage-4/4-4-动态规划基础.html">课程内容</a><a href="../stage-4/4-4-动态规划基础.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">4.5</span><span class="course-title">背包动态规划</span></summary><div class="nav-course-links"><a href="../../lessons/stage-4/4-5-背包动态规划.html">课程内容</a><a href="../stage-4/4-5-背包动态规划.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">4.6</span><span class="course-title">动态规划进阶</span></summary><div class="nav-course-links"><a href="../../lessons/stage-4/4-6-动态规划进阶.html">课程内容</a><a href="../stage-4/4-6-动态规划进阶.html">完整代码</a></div></details></details><details class="nav-phase"><summary><span class="phase-title">阶段 5 · 图论与最短路径</span><small>带权搜索、依赖与连接</small></summary><details class="nav-course"><summary><span class="course-number">5.1</span><span class="course-title">图的遍历与连通性</span></summary><div class="nav-course-links"><a href="../../lessons/stage-5/5-1-图的遍历与连通性.html">课程内容</a><a href="../stage-5/5-1-图的遍历与连通性.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">5.2</span><span class="course-title">Dijkstra</span></summary><div class="nav-course-links"><a href="../../lessons/stage-5/5-2-Dijkstra.html">课程内容</a><a href="../stage-5/5-2-Dijkstra.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">5.3</span><span class="course-title">A*</span></summary><div class="nav-course-links"><a href="../../lessons/stage-5/5-3-A.html">课程内容</a><a href="../stage-5/5-3-A.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">5.4</span><span class="course-title">Floyd–Warshall</span></summary><div class="nav-course-links"><a href="../../lessons/stage-5/5-4-Floyd–Warshall.html">课程内容</a><a href="../stage-5/5-4-Floyd–Warshall.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">5.5</span><span class="course-title">拓扑排序</span></summary><div class="nav-course-links"><a href="../../lessons/stage-5/5-5-拓扑排序.html">课程内容</a><a href="../stage-5/5-5-拓扑排序.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">5.6</span><span class="course-title">并查集</span></summary><div class="nav-course-links"><a href="../../lessons/stage-5/5-6-并查集.html">课程内容</a><a href="../stage-5/5-6-并查集.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">5.7</span><span class="course-title">最小生成树</span></summary><div class="nav-course-links"><a href="../../lessons/stage-5/5-7-最小生成树.html">课程内容</a><a href="../stage-5/5-7-最小生成树.html">完整代码</a></div></details></details><details class="nav-phase" open><summary><span class="phase-title">阶段 6 · 机器人与自动驾驶规划算法</span><small>地图、增量修复与采样规划</small></summary><details class="nav-course"><summary><span class="course-number">6.1</span><span class="course-title">栅格地图搜索</span></summary><div class="nav-course-links"><a href="../../lessons/stage-6/6-1-栅格地图搜索.html">课程内容</a><a href="6-1-栅格地图搜索.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">6.2</span><span class="course-title">动态重规划与 D* Lite</span></summary><div class="nav-course-links"><a href="../../lessons/stage-6/6-2-动态重规划与 D- Lite.html">课程内容</a><a href="6-2-动态重规划与 D- Lite.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">6.3</span><span class="course-title">RRT</span></summary><div class="nav-course-links"><a href="../../lessons/stage-6/6-3-RRT.html">课程内容</a><a href="6-3-RRT.html">完整代码</a></div></details><details class="nav-course" open><summary><span class="course-number">6.4</span><span class="course-title">RRT*</span></summary><div class="nav-course-links"><a href="../../lessons/stage-6/6-4-RRT.html">课程内容</a><a class="active" href="6-4-RRT.html">完整代码</a></div></details><details class="nav-course"><summary><span class="course-number">6.5</span><span class="course-title">轨迹规划基础</span></summary><div class="nav-course-links"><a href="../../lessons/stage-6/6-5-轨迹规划基础.html">课程内容</a><a href="6-5-轨迹规划基础.html">完整代码</a></div></details></details><details class="nav-phase"><summary><span class="phase-title">阶段 7 · 算法面试与综合实战</span><small>课程规划</small></summary><div class="nav-course unavailable"><span class="course-number">7.1</span><span>常用 STL 综合训练 · 待制作</span></div><div class="nav-course unavailable"><span class="course-number">7.2</span><span>手写算法模拟面试 · 待制作</span></div><div class="nav-course unavailable"><span class="course-number">7.3</span><span>复杂度与边界分析 · 待制作</span></div><div class="nav-course unavailable"><span class="course-number">7.4</span><span>算法调试与测试 · 待制作</span></div><div class="nav-course unavailable"><span class="course-number">7.5</span><span>机器人地图搜索综合项目 · 待制作</span></div></details></nav><main class="main"><div class="eyebrow">第 6.4 课 · 完整代码</div><h1>RRT*</h1><p>下面是可独立运行的完整程序，不需要再补头文件或入口。切换语言只改变当前展示的实现。</p><a class="back-to-lesson" href="../../lessons/stage-6/6-4-RRT.html">← 返回课程内容</a>
+<div class="code-language-switch" data-code-tabs role="tablist" aria-label="代码语言"><button type="button" id="code-tab-cpp" role="tab" aria-selected="true" aria-controls="code-panel-cpp" data-language="cpp">C++</button><button type="button" id="code-tab-python" role="tab" aria-selected="false" aria-controls="code-panel-python" data-language="python" tabindex="-1">Python</button></div>
+<section id="code-panel-cpp" class="code-language-panel" data-code-language="cpp" role="tabpanel" aria-labelledby="code-tab-cpp">
+<h2>C++ 完整实现</h2><p><a href="6-4-RRT.cpp" download>下载 C++ 源码</a></p>
+<div class="code-block"><button type="button" class="copy-code" data-copy aria-label="复制代码" title="复制代码"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"></path></svg></button><span class="copy-status" role="status" aria-live="polite"></span><pre><code class="language-cpp">// RRT*
+// 学习重点：新点出现后，在附近可连接的节点中选总成本最低的父节点。
+// 看看旧邻居能否经新点缩短路线，能就重连。
+// 把重连造成的成本变化继续传给其后代。
+// C++17；直接编译运行 main() 中的示例。
+#include &lt;iostream&gt;  // 控制台输入与输出
+#include &lt;vector&gt;  // 动态数组、邻接表或状态表
+#include &lt;queue&gt;  // 先进先出队列或优先队列
+#include &lt;algorithm&gt;  // 排序、取最值、合并或反转等标准算法
+#include &lt;utility&gt;  // 二元组、交换或移动对象
+#include &lt;cmath&gt;  // 距离、幂、平方根或数值判断
+#include &lt;random&gt;  // 可复现实验的随机采样
+#include &lt;iomanip&gt;  // 控制输出精度与格式
+#include &lt;stdexcept&gt;  // 明确报告非法输入
+#include &lt;array&gt;  // 固定长度坐标或障碍边界
+#include &lt;cstddef&gt;  // 标准无符号大小类型
+
+using namespace std;
+
+// 把相关数据与操作集中在一个类型中，避免混淆节点、状态与算法对象。
+struct Point { double x, y; };
+using Obstacle = array&lt;double,4&gt;;
+// 计算两点的欧氏距离，与采样空间坐标使用相同长度单位。
+double distance(Point a, Point b) { return hypot(a.x-b.x,a.y-b.y); }
+
+// 用线段参数区间检测闭矩形碰撞；接触障碍边界也视为碰撞。
+bool collisionFree(Point a, Point b, const vector&lt;Obstacle&gt;&amp; obstacles) {
+    for (auto box : obstacles) {
+        double low = 0, high = 1;
+        for (int axis = 0; axis &lt; 2; ++axis) {
+            double position = axis == 0 ? a.x : a.y;
+            double delta = axis == 0 ? b.x-a.x : b.y-a.y;
+            if (abs(delta) &lt; 1e-12) {
+                if (position &lt; box[axis] || position &gt; box[axis+2]) { low = 1; high = 0; break; }
+            } else {
+                double t1 = (box[axis]-position)/delta, t2 = (box[axis+2]-position)/delta;
+                if (t1 &gt; t2) swap(t1,t2);
+                low = max(low,t1);
+                high = min(high,t2);
+            }
+        }
+        if (low &lt;= high) return false;
+    }
+    return true;
+}
+
+// 把相关数据与操作集中在一个类型中，避免混淆节点、状态与算法对象。
+struct Tree {
+    vector&lt;Point&gt; points;
+    vector&lt;int&gt; parent;
+    vector&lt;double&gt; cost;
+    vector&lt;Point&gt; route;
+};
+
+// 在连续空间采样、扩展与检测碰撞；启用star时增加邻域选父和重连。
+Tree plan(Point start, Point goal, const vector&lt;Obstacle&gt;&amp; obstacles, int iterations, unsigned seed, bool star) {
+    // 不符合本算法前提的输入要明确拒绝，不能带着错误条件继续计算。
+    if (iterations &lt; 0) throw invalid_argument(&quot;negative iteration budget&quot;);
+    if (!collisionFree(start,start,obstacles) || !collisionFree(goal,goal,obstacles)) {
+        throw invalid_argument(&quot;endpoint inside obstacle&quot;);
+    }
+    mt19937 rng(seed);
+    uniform_real_distribution&lt;double&gt; uniform(0,1);
+    Tree tree{{start},{-1},{0},{}};
+    vector&lt;int&gt; candidates;
+    const double step = 0.9;
+    for (int iteration = 0; iteration &lt; iterations; ++iteration) {
+        Point sample = uniform(rng) &lt; 0.12 ? goal : Point{10*uniform(rng),10*uniform(rng)};
+        int near = 0;
+        for (int j = 1; j &lt; static_cast&lt;int&gt;(tree.points.size()); ++j) {
+            if (distance(tree.points[j],sample) &lt; distance(tree.points[near],sample)) near = j;
+        }
+        Point base = tree.points[near];
+        double length = distance(base,sample);
+        if (length &lt; 1e-10) continue;
+        double ratio = min(1.0,step/length);
+        Point point{base.x+ratio*(sample.x-base.x),base.y+ratio*(sample.y-base.y)};
+        if (!collisionFree(base,point,obstacles)) continue;
+        int n = static_cast&lt;int&gt;(tree.points.size());
+        // 二维邻域半径随有效样本数收缩，演示常数不直接等于理论保证。
+        double radius = min(2.5,9*sqrt(log(n+1.0)/(n+1.0)));
+        vector&lt;int&gt; neighbors;
+        if (star) for (int j = 0; j &lt; n; ++j) if (distance(tree.points[j],point) &lt;= radius) neighbors.push_back(j);
+        int parent = near;
+        for (int j : neighbors) {
+            if (tree.cost[j]+distance(tree.points[j],point) &lt; tree.cost[parent]+distance(tree.points[parent],point)
+                &amp;&amp; collisionFree(tree.points[j],point,obstacles)) parent = j;
+        }
+        tree.points.push_back(point);
+        tree.parent.push_back(parent);
+        tree.cost.push_back(tree.cost[parent]+distance(tree.points[parent],point));
+        for (int j : neighbors) {
+            double candidate = tree.cost[n]+distance(point,tree.points[j]);
+            if (j == 0 || candidate+1e-9 &gt;= tree.cost[j] || !collisionFree(point,tree.points[j],obstacles)) continue;
+            // 只有经新节点严格更便宜且线段无碰撞，才重连旧节点。
+            tree.parent[j] = n;
+            tree.cost[j] = candidate;
+            queue&lt;int&gt; changed;
+            changed.push(j);
+            // 把重连造成的成本变化传给全部后代，不能只改一个父指针。
+            while (!changed.empty()) {
+                // 读取先进先出的队首，保持发现的层次顺序。
+                int p = changed.front();
+                changed.pop();
+                for (int child = 1; child &lt;= n; ++child) if (tree.parent[child] == p) {
+                    tree.cost[child] = tree.cost[p]+distance(tree.points[p],tree.points[child]);
+                    changed.push(child);
+                }
+            }
+        }
+        if (distance(point,goal) &lt;= step &amp;&amp; collisionFree(point,goal,obstacles)) candidates.push_back(n);
+    }
+    // 先处理空容器或无结果情况，避免访问不存在的元素。
+    if (!candidates.empty()) {
+        int best = *min_element(candidates.begin(),candidates.end(),[&amp;](int a,int b) {
+            return tree.cost[a]+distance(tree.points[a],goal) &lt; tree.cost[b]+distance(tree.points[b],goal);
+        });
+        tree.route.push_back(goal);
+        for (int u = best; u != -1; u = tree.parent[u]) tree.route.push_back(tree.points[u]);
+        // 把反向收集的数据恢复为实际输出顺序。
+        reverse(tree.route.begin(),tree.route.end());
+    }
+    return tree;
+}
+
+// 程序入口：准备示例数据，调用算法，并输出结果供手算核对。
+int main() {
+    vector&lt;Obstacle&gt; obstacles{{3,2,6,7}};
+    Tree tree = plan({1,1},{9,9},obstacles,250,7,true);
+    // 输出计算结果，便于与课程例子或自行推演的答案核对。
+    cout &lt;&lt; &quot;nodes=&quot; &lt;&lt; tree.points.size() &lt;&lt; &#x27;\n&#x27;;
+    // 先处理空容器或无结果情况，避免访问不存在的元素。
+    if (tree.route.empty()) { cout &lt;&lt; &quot;not found within budget\n&quot;; return 0; }
+    double total = 0;
+    for (size_t i = 1; i &lt; tree.route.size(); ++i) total += distance(tree.route[i-1],tree.route[i]);
+    // 输出计算结果，便于与课程例子或自行推演的答案核对。
+    cout &lt;&lt; fixed &lt;&lt; setprecision(4) &lt;&lt; &quot;length=&quot; &lt;&lt; total &lt;&lt; &#x27;\n&#x27;;
+    for (Point p : tree.route) cout &lt;&lt; p.x &lt;&lt; &#x27;,&#x27; &lt;&lt; p.y &lt;&lt; &#x27;\n&#x27;;
+}
+</code></pre></div>
+<h3>保存文件后怎样运行？</h3><pre class="run-command"><code>g++ -std=c++17 -O2 &quot;6-4-RRT.cpp&quot; -o lesson.exe
+.\lesson.exe</code></pre></section><section id="code-panel-python" class="code-language-panel" data-code-language="python" role="tabpanel" aria-labelledby="code-tab-python" hidden>
+<h2>Python 完整实现</h2><p><a href="6-4-RRT.py" download>下载 Python 源码</a></p>
+<div class="code-block"><button type="button" class="copy-code" data-copy aria-label="复制代码" title="复制代码"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"></path></svg></button><span class="copy-status" role="status" aria-live="polite"></span><pre><code class="language-python"># RRT*
+# Python 3；直接运行文件，修改示例数据可继续练习。
+# 新点出现后，在附近可连接的节点中选总成本最低的父节点。
+
+import math
+import random
+from collections import deque
+
+# 用线段参数区间检测闭矩形碰撞；接触障碍边界也视为碰撞。
+def collision_free(a, b, obstacles):
+    &quot;&quot;&quot;通过线段参数区间求交检测闭矩形障碍；边界接触也算碰撞。&quot;&quot;&quot;
+    for left, bottom, right, top in obstacles:
+        low, high = (0.0, 1.0)
+        for p, delta, lo, hi in ((a[0], b[0] - a[0], left, right), (a[1], b[1] - a[1], bottom, top)):
+            if abs(delta) &lt; 1e-12:
+                if not lo &lt;= p &lt;= hi:
+                    low, high = (1.0, 0.0)
+                    break
+            else:
+                t1, t2 = sorted(((lo - p) / delta, (hi - p) / delta))
+                low, high = (max(low, t1), min(high, t2))
+        if low &lt;= high:
+            return False
+    return True
+
+# 在连续空间采样、扩展与检测碰撞；启用star时增加邻域选父和重连。
+def rrt(start, goal, obstacles, iterations=180, seed=7, star=False):
+    if iterations &lt; 0:
+        # 不符合本算法前提的输入要明确拒绝，不能带着错误条件继续计算。
+        raise ValueError(&#x27;采样次数不能为负&#x27;)
+    if not collision_free(start, start, obstacles) or not collision_free(goal, goal, obstacles):
+        raise ValueError(&#x27;起点或终点位于障碍内&#x27;)
+    # 没有前驱的起点用−1标记，回溯到这里就结束。
+    rng, points, parents, costs = (random.Random(seed), [start], [-1], [0.0])
+    step, goal_candidates, route = (0.9, [], [])
+    for iteration in range(iterations):
+        sample = goal if rng.random() &lt; 0.12 else (rng.uniform(0, 10), rng.uniform(0, 10))
+        near = min(range(len(points)), key=lambda j: math.dist(points[j], sample))
+        distance = math.dist(points[near], sample)
+        if distance &lt; 1e-10:
+            continue
+        scale = min(1.0, step / distance)
+        new = tuple((points[near][k] + scale * (sample[k] - points[near][k]) for k in (0, 1)))
+        if not collision_free(points[near], new, obstacles):
+            continue
+        # 二维邻域半径随有效样本数收缩，演示常数不直接等于理论保证。
+        radius = min(2.5, 9.0 * math.sqrt(math.log(len(points) + 1) / (len(points) + 1)))
+        neighbors = [j for j, p in enumerate(points) if math.dist(p, new) &lt;= radius] if star else [near]
+        feasible = [j for j in set(neighbors + [near]) if collision_free(points[j], new, obstacles)]
+        parent = min(feasible, key=lambda j: costs[j] + math.dist(points[j], new))
+        index = len(points)
+        points.append(new)
+        parents.append(parent)
+        costs.append(costs[parent] + math.dist(points[parent], new))
+        rewired = []
+        if star:
+            for j in neighbors:
+                candidate = costs[index] + math.dist(new, points[j])
+                if j and candidate + 1e-09 &lt; costs[j] and collision_free(new, points[j], obstacles):
+                    # 只有经新节点严格更便宜且线段无碰撞，才重连旧节点。
+                    parents[j] = index
+                    costs[j] = candidate
+                    rewired.append(j)
+                    queue = deque([j])
+                    # 把重连造成的成本变化传给全部后代，不能只改一个父指针。
+                    while queue:
+                        # 读取先进先出的队首，保持发现的层次顺序。
+                        p = queue.popleft()
+                        for child in range(1, len(points)):
+                            if parents[child] == p:
+                                costs[child] = costs[p] + math.dist(points[p], points[child])
+                                queue.append(child)
+        if math.dist(new, goal) &lt;= step and collision_free(new, goal, obstacles):
+            goal_candidates.append(index)
+        route = []
+        if goal_candidates:
+            p = min(goal_candidates, key=lambda j: costs[j] + math.dist(points[j], goal))
+            route = [goal]
+            while p != -1:
+                route.append(points[p])
+                p = parents[p]
+            # 把反向收集的数据恢复为实际输出顺序。
+            route.reverse()
+    return (points, parents, costs, route if iterations else [])
+
+# 程序入口：准备示例数据，调用算法，并输出结果供手算核对。
+def main():
+    points, parents, costs, route = rrt((1, 1), (9, 9), [(3, 2, 6, 7)], 250, 7, True)
+    # 输出计算结果，便于与课程例子或自行推演的答案核对。
+    print(&#x27;nodes:&#x27;, len(points))
+    print(&#x27;route:&#x27;, route or &#x27;not found within budget&#x27;)
+    print(&#x27;length:&#x27;, sum((math.dist(a, b) for a, b in zip(route, route[1:]))))
+if __name__ == &#x27;__main__&#x27;:
+    main()
+</code></pre></div>
+<h3>保存文件后怎样运行？</h3><pre class="run-command"><code>python &quot;6-4-RRT.py&quot;</code></pre></section><h2>写代码时最容易错的地方</h2><div class="mistake-example"><h3>重连后忘记更新后代</h3><p>节点 B 从代价 10 降为 8，子节点 C 与 B 的边代价 2。</p><strong>容易写错</strong><pre><code>parent[B]=new_parent; cost[B]=8;</code></pre><strong>修改后</strong><pre><code>parent[B]=new_parent; cost[B]=8;
+update_descendant_costs(B);</code></pre><p>B 的子孙代价也依赖 B，必须按实际实现传播更新。</p><a class="implementation-button" href="../../lessons/stage-6/6-4-RRT.html?mistake=1#demo">查看此错误的过程演示 →</a></div><div class="mistake-example"><h3>有限样本宣称全局最优</h3><p>采样 500 次获得代价 10 的可行路径。</p><strong>容易写错</strong><pre><code>if (found) print(&quot;全局最优&quot;);</code></pre><strong>修改后</strong><pre><code>if (found) print(&quot;当前找到的最好可行路径&quot;);</code></pre><p>渐近最优指满足条件时样本数趋于无穷的性质，有限运行无法据此保证全局最优。</p><a class="implementation-button" href="../../lessons/stage-6/6-4-RRT.html?mistake=2#demo">查看此错误的过程演示 →</a></div><h3>运行后怎样检查？</h3><p>只改变父指针却不更新子树成本，会让后续父节点选择出错。不能声称固定有限样本必然得到最短路。</p><details class="answer"><summary>参考与拓展阅读</summary><p>以下资料用于核对题意、适用条件与常见边界；本站例子与讲解按教学顺序重新组织。</p><ul><li><a href="https://arxiv.org/abs/1105.1186" target="_blank" rel="noopener noreferrer">RRT* 渐近最优性原论文</a></li></ul></details></main></div></body></html>
